@@ -132,7 +132,7 @@ def binarize_image(gray_image, threshold=127):
     return binary_image
 
 def get_datapoints_from_ccm(image, ccm):
-    """ returns datapoints for any ccm """
+    """ returns data points for any ccm """
     if image_is_continuous(image):
         return get_continuous_datapoints_for_cc_matrix(ccm)
     if image_is_descrete(image):
@@ -151,55 +151,78 @@ def get_continuous_datapoints_for_cc_matrix(cc_matrix):
     [1,1] # TODO
 
 def get_discrete_datapoints_for_cc_matrix(cc_matrix):
-    from math import ceil
     """ Returns x, y datapoints for component  in JSON form """
-    print('getting coords from connected component matrix: ', cc_matrix)
-    x_labels = ["t1", "t2", "t3", "t4", "t5"]
-    x_width = 900
-    y_pixel_height = 550
-    y_val_max = 1.2
 
+    x_labels = get_x_axis_labels()
+    x_width = get_x_axis_width()
+    y_pixel_height = get_y_axis_pixel_height()
+    y_val_max = get_y_axis_val_max()
+    label_positions = get_x_label_positions(x_labels, x_width)
+    cuts = get_x_axis_cuts(label_positions, cc_matrix)
+    y_coords = get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height)
+    x_y_coord_list = get_x_y_coord_list(x_labels, y_coords)
 
+    # y coords now unadjusted
+    return x_y_coord_list # TODO
+
+def get_x_axis_labels():
+    #TODO
+    return ["t1", "t2", "t3", "t4", "t5"]
+
+def get_x_axis_width():
+    #TODO
+    return 900
+
+def get_y_axis_pixel_height():
+    # TODO
+    return 550
+
+def get_y_axis_val_max():
+    #TODO
+    return 1.2
+
+def get_x_label_positions(x_labels, x_width):
+    from math import ceil
     label_positions = []
+    n_slices = len(x_labels) - 1
 
-    n_slices = len(x_labels)-1
-    for idx in xrange(0, n_slices+1):
-        label_positions.append(int(ceil(x_width * (float(idx) / n_slices)))) # ew
+    for idx in xrange(0, n_slices + 1):
+        label_positions.append(int(ceil(x_width * (float(idx) / n_slices))))  # ew
 
+    return label_positions
 
-    print(label_positions)
-
+def get_x_axis_cuts(label_positions, cc_matrix):
     cuts = []
     for pos in label_positions:
         cut = cc_matrix[:, pos]
         cuts.append(cut)
 
-    print cuts[0]
+    return cuts
 
+def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
+    pixel_coords = []
+    units_per_pixel = float(y_val_max) / float(y_pixel_height)
     y_coords = []
 
+    # get pixel number where we first see our connected component
+    # in our cut
     for idx in range(len(cuts)):
-        y_coords.append(cuts[idx].tolist().index(255))
+        pixel_coords.append(cuts[idx].tolist().index(255))
 
-    print('prefixed y coords: ', y_coords)
+    # translate pixel coords to y value
+    for coord in pixel_coords:
+        y_value = y_val_max - (coord * units_per_pixel)
+        y_coords.append(y_value)
 
-    units_per_pixel = float(y_val_max)/float(y_pixel_height)
-    new_y_cords = []
-    for coord in y_coords:
-        actual = y_val_max - ( coord * units_per_pixel )
-        new_y_cords.append(actual)
+    return y_coords
 
-    # y coords now unadjusted
-
-    print(cuts[4].tolist().index(255))
-
+def get_x_y_coord_list(x_labels, y_coords):
     x_y_coords = []
-    for x, y in zip(x_labels, new_y_cords):
+
+    for x, y in zip(x_labels, y_coords):
         x_y_coords.append([x,y])
 
-    print(x_y_coords)
-
-    return [2,2] # TODO
+    return x_y_coords
 
 if __name__ == '__main__':
     # process_via_pipeline('line_graph_two.png')
