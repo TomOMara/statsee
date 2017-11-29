@@ -151,8 +151,54 @@ def get_continuous_datapoints_for_cc_matrix(cc_matrix):
     [1,1] # TODO
 
 def get_discrete_datapoints_for_cc_matrix(cc_matrix):
+    from math import ceil
     """ Returns x, y datapoints for component  in JSON form """
     print('getting coords from connected component matrix: ', cc_matrix)
+    x_labels = ["t1", "t2", "t3", "t4", "t5"]
+    x_width = 900
+    y_pixel_height = 550
+    y_val_max = 1.2
+
+
+    label_positions = []
+
+    n_slices = len(x_labels)-1
+    for idx in xrange(0, n_slices+1):
+        label_positions.append(int(ceil(x_width * (float(idx) / n_slices)))) # ew
+
+
+    print(label_positions)
+
+    cuts = []
+    for pos in label_positions:
+        cut = cc_matrix[:, pos]
+        cuts.append(cut)
+
+    print cuts[0]
+
+    y_coords = []
+
+    for idx in range(len(cuts)):
+        y_coords.append(cuts[idx].tolist().index(255))
+
+    print('prefixed y coords: ', y_coords)
+
+    units_per_pixel = float(y_val_max)/float(y_pixel_height)
+    new_y_cords = []
+    for coord in y_coords:
+        actual = y_val_max - ( coord * units_per_pixel )
+        new_y_cords.append(actual)
+
+    # y coords now unadjusted
+
+    print(cuts[4].tolist().index(255))
+
+    x_y_coords = []
+    for x, y in zip(x_labels, new_y_cords):
+        x_y_coords.append([x,y])
+
+    print(x_y_coords)
+
     return [2,2] # TODO
 
 if __name__ == '__main__':
