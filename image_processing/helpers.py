@@ -8,7 +8,8 @@ def show_image(image):
     cv2.waitKey(0)
 
 def process_via_pipeline(image_name):
-    gray_image = grayscale_image(image_name=image_name, target_name='gray_' + image_name)
+    image = cv2.imread(image_name)
+    gray_image = grayscale_image(image)
     binary_image = binarize_image(gray_image)
 
     connected_component_matrix = get_cc_matrix_from_binary_image(binary_image)
@@ -32,9 +33,10 @@ def process_via_pipeline(image_name):
 
 def get_all_datasets_for_image(image_name):
     datasets = []
+    image = cv2.imread(image_name)
 
-    for ccm in all_connected_component_matrices():
-         datasets += get_datapoints_from_ccm(image_name, ccm)
+    for ccm in all_connected_component_matrices(image):
+         datasets += get_datapoints_from_ccm(image, ccm)
 
     return datasets
 
@@ -46,7 +48,7 @@ def all_connected_component_matrices(original_image):
         binary_image = preprocess_image(split_image)
         ccm = get_cc_matrix_from_binary_image(binary_image)
 
-        ccms += ccm
+        ccms.append(ccm)
 
     return ccms
 
@@ -58,13 +60,13 @@ def original_image_split_by_curves(original_image):
     split_images = []
 
     # logic here which identifies number of curves
-    split_images += original_image
+    split_images.append(original_image)
     # for the moment just return the original image
     return split_images
 
-def preprocess_image(image_name):
+def preprocess_image(image):
     """ Preprocess image, returned in binary"""
-    gray_image = grayscale_image(image_name=image_name, target_name='gray_' + image_name)
+    gray_image = grayscale_image(image)
     # any other preprocessing steps such as bluring would go here
 
     binary_image = binarize_image(gray_image)
@@ -103,29 +105,14 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=1000):
 
     return cc_matrix
 
-def grayscale_image(image_name, target_name):
+def grayscale_image(image):
     """
     Gray scale image helper
-
-    :param image_name: string such as image.png
-    :param target_name: string such as gray_image.png
-    :return: nothing, outputs the string in the current directory
     """
-    if type(image_name) is not str:
-        print "cant gray scale " + str(image_name) + ". Need a path i.e images/img.png"
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray_image = cv2.bitwise_not(gray_image)
 
-    elif type(target_name) is not str:
-        print "target grayscale image name must be a string. i.e grascale_img.png"
-
-    else:
-        try:
-            image = cv2.imread(image_name)
-            gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            gray_image = cv2.bitwise_not(gray_image)
-
-            return gray_image
-        except Exception as e:
-            print('unable to grayscale ' + image_name + ' to ' + target_name)
+    return gray_image
 
 def binarize_image(gray_image, threshold=127):
     """
@@ -153,19 +140,24 @@ def get_datapoints_from_ccm(image, ccm):
 
 def image_is_continuous(image):
     """ This will axis type from REV and return true if continuous"""
-    pass
+    return False # TODO
 
 def image_is_descrete(image):
     """ This will axis type from REV and return true if discrete"""
-    pass
+    return True # TODO
 
 def get_continuous_datapoints_for_cc_matrix(cc_matrix):
     """ Returns x, y datapoints for component  in JSON form """
-    pass
+    [1,1] # TODO
 
 def get_discrete_datapoints_for_cc_matrix(cc_matrix):
     """ Returns x, y datapoints for component  in JSON form """
-    pass
+    print('getting coords from connected component matrix: ', cc_matrix)
+    return [2,2] # TODO
 
 if __name__ == '__main__':
-    process_via_pipeline('line_graph_two.png')
+    # process_via_pipeline('line_graph_two.png')
+
+    sets = get_all_datasets_for_image('line_graph_two.png')
+
+    print('sets: ', sets)
