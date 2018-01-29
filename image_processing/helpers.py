@@ -167,8 +167,8 @@ def convert_mask_to_3D_image(mask):
         return mask
     else:
         # otherwise write image and re-read it.
-        cv2.imwrite("tmp.png", mask)
-        mask_as_image = cv2.imread("tmp.png")
+        cv2.imwrite("images/tmp.png", mask)
+        mask_as_image = cv2.imread("images/tmp.png")
 
         return mask_as_image
 
@@ -221,7 +221,7 @@ def grayscale_image(image):
 
     return gray_image
 
-def binarize_image(gray_image, threshold=50):
+def binarize_image(gray_image, threshold=2):
     """
     Binarize an image in preparation for Connected component analysis.
 
@@ -337,11 +337,11 @@ def get_x_y_coord_list(x_labels, y_coords):
     return x_y_coords
 
 if __name__ == '__main__':
-    # process_via_pipeline('line_graph_two.png')
+    # process_via_pipeline('images/line_graph_two.png')
     if DEBUG:
         clear_tmp_on_run()
 
 
-    sets = get_all_datasets_for_image('line_graph_three.png')
+    sets = get_all_datasets_for_image('images/line_graph_three.png')
 
     print('sets: ', sets)
