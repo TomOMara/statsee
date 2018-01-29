@@ -1,4 +1,7 @@
 import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+plt.interactive(False)
 
 def show_image(image):
     if type(image) is str:
@@ -59,10 +62,67 @@ def original_image_split_by_curves(original_image):
     """
     split_images = []
 
+
     # logic here which identifies number of curves
-    split_images.append(original_image)
+    # split_images.append(graphs_split_by_curve_colour(original_image) +
+    #                      graphs_split_by_curve_style(original_image))
+    split_images.append(graphs_split_by_curve_colour(original_image))
+    """
+    For different line styles: 
+        
+    """
+
+    # If there are not multiple curves, just return original.
+    if not split_images:
+        split_images.append(original_image)
     # for the moment just return the original image
     return split_images
+
+def graphs_split_by_curve_colour(original_image):
+    """
+    for coloured graphs! ->
+        # first we pre-process the image
+        # then we get the amount of separate blobs from several cuts along the x axis and take the highest number
+        # ( to reduce chance of gap between dashes )
+        # n_lines = 3 for instance
+        # then we get the cut where n_lines was highest
+        # then we get the central! pixel in each blob
+        # then we determine the colour of this pixel
+        # then we look a the original image again, filtering any colours that aren't this colour ( or v close too )
+        # then we have a graph which only contains the colour of the line we want
+        # then we have each graph to split_images array
+        # repeat until n_lines is 0
+    """
+    # first we pre-process the image
+    #binary_image = preprocess_image(original_image)
+    images_of_curves_split_by_colour = []
+
+    h, w, chn = original_image.shape
+    # seed = (w / 2, h / 2)
+    seeds = get_seeds_from_image()
+
+    floodflags = 4
+    floodflags |= cv2.FLOODFILL_MASK_ONLY
+    floodflags |= (255 << 8)
+
+    # create a mask from each seed which is
+    for seed in seeds:
+        mask = np.zeros((h + 2, w + 2), np.uint8)
+        num, im, mask, rect = cv2.floodFill(original_image, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
+        # cv2.imwrite("new.png", mask)
+        images_of_curves_split_by_colour.append(mask)
+
+    return images_of_curves_split_by_colour
+
+def get_seeds_from_image():
+    return (30,30), (60,60)
+
+def graphs_split_by_curve_style(original_image):
+
+    images_of_curves_split_by_style = []
+
+    return images_of_curves_split_by_style
+
 
 def preprocess_image(image):
     """ Preprocess image, returned in binary"""
@@ -158,12 +218,12 @@ def get_discrete_datapoints_for_cc_matrix(cc_matrix):
     y_pixel_height = get_y_axis_pixel_height()
     y_val_max = get_y_axis_val_max()
     label_positions = get_x_label_positions(x_labels, x_width)
-    cuts = get_x_axis_cuts(label_positions, cc_matrix)
+    cuts = get_x_axis_cuts_from_ccm(label_positions, cc_matrix)
     y_coords = get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height)
     x_y_coord_list = get_x_y_coord_list(x_labels, y_coords)
 
     # y coords now unadjusted
-    return x_y_coord_list # TODO
+    return x_y_coord_list
 
 def get_x_axis_labels():
     #TODO
@@ -182,6 +242,8 @@ def get_y_axis_val_max():
     return 1.2
 
 def get_x_label_positions(x_labels, x_width):
+    """ gets coordinates of x axis labels in pixels """
+
     from math import ceil
     label_positions = []
     n_slices = len(x_labels) - 1
@@ -191,7 +253,7 @@ def get_x_label_positions(x_labels, x_width):
 
     return label_positions
 
-def get_x_axis_cuts(label_positions, cc_matrix):
+def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
     cuts = []
     for pos in label_positions:
         cut = cc_matrix[:, pos]
@@ -227,6 +289,6 @@ def get_x_y_coord_list(x_labels, y_coords):
 if __name__ == '__main__':
     # process_via_pipeline('line_graph_two.png')
 
-    sets = get_all_datasets_for_image('line_graph_two.png')
+    sets = get_all_datasets_for_image('red_green.png')
 
     print('sets: ', sets)
