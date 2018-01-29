@@ -2,7 +2,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 plt.interactive(False)
-
+DEBUG = True
 def show_image(image):
     if type(image) is str:
         image = cv2.imread(image)
@@ -87,6 +87,7 @@ def graphs_split_by_curve_colour(original_image):
     """
     for coloured graphs! ->
         # first we pre-process the image
+            # only removing lines that aren't thick i.e graph lines
         # then we get the amount of separate blobs from several cuts along the x axis and take the highest number
         # ( to reduce chance of gap between dashes )
         # n_lines = 3 for instance
@@ -99,11 +100,11 @@ def graphs_split_by_curve_colour(original_image):
         # repeat until n_lines is 0
     """
     # first we pre-process the image
-    #binary_image = preprocess_image(original_image)
+    binary_image = preprocess_image(original_image)
     images_of_curves_split_by_colour = []
 
     h, w, chn = original_image.shape
-    # seed = (w / 2, h / 2)
+
     seeds = get_seeds_from_image()
 
     floodflags = 4
@@ -114,7 +115,8 @@ def graphs_split_by_curve_colour(original_image):
     for seed in seeds:
         mask = np.zeros((h + 2, w + 2), np.uint8)
         num, im, mask, rect = cv2.floodFill(original_image, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
-        # cv2.imwrite("new.png", mask)
+
+        mask = convert_mask_to_3D_image(mask)
 
         # Error thrown here because the mask is not the same shape as original image. i.e it is 2d not 3d. this
         # has knock on effects when the pipleline expects a 3d image.
@@ -123,10 +125,12 @@ def graphs_split_by_curve_colour(original_image):
            # assert(False)
         images_of_curves_split_by_colour.append(mask)
 
-
+    print "{0} coloured curves found.".format( len(images_of_curves_split_by_colour) )
     return images_of_curves_split_by_colour # because its sitting in to arrays
 
 def get_seeds_from_image():
+    #TODO: DROP SEEDS ON THE LINES
+    # should return an array of tuples containing coordinates where we are certain there is a unique line.
     return (30,30), (60,60)
 
 def graphs_split_by_curve_style(original_image):
@@ -138,7 +142,6 @@ def graphs_split_by_curve_style(original_image):
 
 def preprocess_image(image):
     """ Preprocess image, returned in binary"""
-    image = convert_mask_to_3D_image(image)
 
     gray_image = grayscale_image(image)
     # any other preprocessing steps such as bluring would go here
@@ -203,9 +206,12 @@ def grayscale_image(image):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray_image = cv2.bitwise_not(gray_image)
 
+    if DEBUG:
+        cv2.imwrite("tmp/tmp_grayscale.png", gray_image)
+
     return gray_image
 
-def binarize_image(gray_image, threshold=127):
+def binarize_image(gray_image, threshold=50):
     """
     Binarize an image in preparation for Connected component analysis.
 
@@ -219,6 +225,9 @@ def binarize_image(gray_image, threshold=127):
         gray_image = cv2.cvtColor(gray_image, cv2.COLOR_BGR2GRAY)
 
     binary_image = cv2.threshold(gray_image, threshold, 255, cv2.THRESH_BINARY)[1]
+
+    if DEBUG:
+        cv2.imwrite("tmp/tmp_binarize.png", gray_image)
 
     return binary_image
 
@@ -258,7 +267,7 @@ def get_discrete_datapoints_for_cc_matrix(cc_matrix):
 
 def get_x_axis_labels():
     #TODO
-    return ["t1", "t2", "t3", "t4", "t5"]
+    return ["1", "2", "3", "4"]
 
 def get_x_axis_width():
     #TODO
@@ -320,6 +329,6 @@ def get_x_y_coord_list(x_labels, y_coords):
 if __name__ == '__main__':
     # process_via_pipeline('line_graph_two.png')
 
-    sets = get_all_datasets_for_image('line_graph_two.png')
+    sets = get_all_datasets_for_image('line_graph_three.png')
 
     print('sets: ', sets)
