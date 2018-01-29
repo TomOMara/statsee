@@ -3,6 +3,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 plt.interactive(False)
 DEBUG = True
+
+def clear_tmp_on_run():
+    import os
+    import glob
+    files = glob.glob(os.getcwd() + '/tmp/*')
+    for f in files:
+        os.remove(f)
+
+
+
 def show_image(image):
     if type(image) is str:
         image = cv2.imread(image)
@@ -328,6 +338,9 @@ def get_x_y_coord_list(x_labels, y_coords):
 
 if __name__ == '__main__':
     # process_via_pipeline('line_graph_two.png')
+    if DEBUG:
+        clear_tmp_on_run()
+
 
     sets = get_all_datasets_for_image('line_graph_three.png')
 
