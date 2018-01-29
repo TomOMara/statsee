@@ -48,7 +48,7 @@ def all_connected_component_matrices(original_image):
     ccms = []
 
     for split_image in original_image_split_by_curves(original_image):
-        binary_image = preprocess_image(split_image)
+        binary_image = preprocess_image(split_image)  # already a binary image
         ccm = get_cc_matrix_from_binary_image(binary_image)
 
         ccms.append(ccm)
@@ -66,7 +66,12 @@ def original_image_split_by_curves(original_image):
     # logic here which identifies number of curves
     # split_images.append(graphs_split_by_curve_colour(original_image) +
     #                      graphs_split_by_curve_style(original_image))
-    split_images.append(graphs_split_by_curve_colour(original_image))
+
+    for split_image in graphs_split_by_curve_colour(original_image):
+        split_images.append(split_image)
+
+    # TODO: loop again over graphs split by curve style..
+
     """
     For different line styles: 
         
@@ -110,9 +115,16 @@ def graphs_split_by_curve_colour(original_image):
         mask = np.zeros((h + 2, w + 2), np.uint8)
         num, im, mask, rect = cv2.floodFill(original_image, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
         # cv2.imwrite("new.png", mask)
+
+        # Error thrown here because the mask is not the same shape as original image. i.e it is 2d not 3d. this
+        # has knock on effects when the pipleline expects a 3d image.
+        if not (original_image.shape == mask.shape):
+           print "orignal_image shape: " + str(original_image.shape) + "\n" + "mask shape: " + str(mask.shape)
+           # assert(False)
         images_of_curves_split_by_colour.append(mask)
 
-    return images_of_curves_split_by_colour
+
+    return images_of_curves_split_by_colour # because its sitting in to arrays
 
 def get_seeds_from_image():
     return (30,30), (60,60)
@@ -126,12 +138,31 @@ def graphs_split_by_curve_style(original_image):
 
 def preprocess_image(image):
     """ Preprocess image, returned in binary"""
+    image = convert_mask_to_3D_image(image)
+
     gray_image = grayscale_image(image)
     # any other preprocessing steps such as bluring would go here
 
     binary_image = binarize_image(gray_image)
 
     return binary_image
+
+def convert_mask_to_3D_image(mask):
+
+    # If image is already 3d
+    if array_is_3D(mask):
+        return mask
+    else:
+        # otherwise write image and re-read it.
+        cv2.imwrite("tmp.png", mask)
+        mask_as_image = cv2.imread("tmp.png")
+
+        return mask_as_image
+
+
+def array_is_3D(image):
+
+    return len(image.shape) == 3
 
 def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=1000):
     """
@@ -289,6 +320,6 @@ def get_x_y_coord_list(x_labels, y_coords):
 if __name__ == '__main__':
     # process_via_pipeline('line_graph_two.png')
 
-    sets = get_all_datasets_for_image('red_green.png')
+    sets = get_all_datasets_for_image('line_graph_two.png')
 
     print('sets: ', sets)
