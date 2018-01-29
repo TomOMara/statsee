@@ -1,8 +1,10 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+
 plt.interactive(False)
 DEBUG = True
+
 
 def clear_tmp_on_run():
     import os
@@ -12,7 +14,6 @@ def clear_tmp_on_run():
         os.remove(f)
 
 
-
 def show_image(image):
     if type(image) is str:
         image = cv2.imread(image)
@@ -20,13 +21,13 @@ def show_image(image):
     cv2.imshow("output", image)
     cv2.waitKey(0)
 
+
 def process_via_pipeline(image_name):
     image = cv2.imread(image_name)
     gray_image = grayscale_image(image)
     binary_image = binarize_image(gray_image)
 
     connected_component_matrix = get_cc_matrix_from_binary_image(binary_image)
-
 
     print(connected_component_matrix)
 
@@ -44,14 +45,16 @@ def process_via_pipeline(image_name):
     # If the data is continuous, the number of vertical slices will have to
     # be inferred based on the some heuristic, maybe x axis width?
 
+
 def get_all_datasets_for_image(image_name):
     datasets = []
     image = cv2.imread(image_name)
 
     for ccm in all_connected_component_matrices(image):
-         datasets += get_datapoints_from_ccm(image, ccm)
+        datasets += get_datapoints_from_ccm(image, ccm)
 
     return datasets
+
 
 def all_connected_component_matrices(original_image):
     """ returns array of all connected component matrices """
@@ -65,13 +68,13 @@ def all_connected_component_matrices(original_image):
 
     return ccms
 
+
 def original_image_split_by_curves(original_image):
     """
     Produces array of images split by curves, i.e if image had N curves,
     this should produce array of N images, one with each curve on it.
     """
     split_images = []
-
 
     # logic here which identifies number of curves
     # split_images.append(graphs_split_by_curve_colour(original_image) +
@@ -93,6 +96,7 @@ def original_image_split_by_curves(original_image):
     # for the moment just return the original image
     return split_images
 
+
 def graphs_split_by_curve_colour(original_image):
     """
     for coloured graphs! ->
@@ -111,6 +115,9 @@ def graphs_split_by_curve_colour(original_image):
     """
     # first we pre-process the image
     binary_image = preprocess_image(original_image)
+
+    cleaned_image = clean_image(original_image)
+
     images_of_curves_split_by_colour = []
 
     h, w, chn = original_image.shape
@@ -131,20 +138,49 @@ def graphs_split_by_curve_colour(original_image):
         # Error thrown here because the mask is not the same shape as original image. i.e it is 2d not 3d. this
         # has knock on effects when the pipleline expects a 3d image.
         if not (original_image.shape == mask.shape):
-           print "orignal_image shape: " + str(original_image.shape) + "\n" + "mask shape: " + str(mask.shape)
-           # assert(False)
+            print "orignal_image shape: " + str(original_image.shape) + "\n" + "mask shape: " + str(mask.shape)
+            # assert(False)
         images_of_curves_split_by_colour.append(mask)
 
-    print "{0} coloured curves found.".format( len(images_of_curves_split_by_colour) )
-    return images_of_curves_split_by_colour # because its sitting in to arrays
+    print "{0} coloured curves found.".format(len(images_of_curves_split_by_colour))
+    return images_of_curves_split_by_colour  # because its sitting in to arrays
+
+
+def clean_image(image):
+    # image = crop_to_plot_area(image)
+    image = remove_grid_lines(image)
+
+    return image
+
+
+def crop_to_plot_area(image):
+    # TODO: take plot area from REV JSON and remove anything else
+    pass
+
+
+def remove_grid_lines(image):
+    image = blur_image(image)
+    if DEBUG: show_image(image)
+    gray_image = grayscale_image(image)
+    if DEBUG: show_image(gray_image)
+    binary_image_without_grid = binarize_image(gray_image, 20)
+    if DEBUG: show_image(binary_image_without_grid)
+    return binary_image_without_grid
+
+
+def blur_image(image):
+    blur_factor = 9
+    kernel_large = np.ones((blur_factor, blur_factor), np.float32) / blur_factor ** 2
+    return cv2.filter2D(image, -1, kernel_large)
+
 
 def get_seeds_from_image():
-    #TODO: DROP SEEDS ON THE LINES
+    # TODO: DROP SEEDS ON THE LINES
     # should return an array of tuples containing coordinates where we are certain there is a unique line.
-    return (30,30), (60,60)
+    return (30, 30), (60, 60)
+
 
 def graphs_split_by_curve_style(original_image):
-
     images_of_curves_split_by_style = []
 
     return images_of_curves_split_by_style
@@ -160,8 +196,8 @@ def preprocess_image(image):
 
     return binary_image
 
-def convert_mask_to_3D_image(mask):
 
+def convert_mask_to_3D_image(mask):
     # If image is already 3d
     if array_is_3D(mask):
         return mask
@@ -174,8 +210,8 @@ def convert_mask_to_3D_image(mask):
 
 
 def array_is_3D(image):
-
     return len(image.shape) == 3
+
 
 def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=1000):
     """
@@ -199,7 +235,7 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=1000):
         # otherwise, construct the component mask and count the
         # number of pixels
         component_mask = np.zeros(binary_image.shape, dtype="uint8")
-        component_mask[connected_components == component] = 255 # inject our component into the mask
+        component_mask[connected_components == component] = 255  # inject our component into the mask
         component_pixels_count = cv2.countNonZero(component_mask)
 
         # if the number of pixels in the component is sufficiently
@@ -208,6 +244,7 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=1000):
             cc_matrix = cv2.add(cc_matrix, component_mask)
 
     return cc_matrix
+
 
 def grayscale_image(image):
     """
@@ -221,7 +258,8 @@ def grayscale_image(image):
 
     return gray_image
 
-def binarize_image(gray_image, threshold=2):
+
+def binarize_image(gray_image, threshold=255):
     """
     Binarize an image in preparation for Connected component analysis.
 
@@ -241,6 +279,7 @@ def binarize_image(gray_image, threshold=2):
 
     return binary_image
 
+
 def get_datapoints_from_ccm(image, ccm):
     """ returns data points for any ccm """
     if image_is_continuous(image):
@@ -248,17 +287,21 @@ def get_datapoints_from_ccm(image, ccm):
     if image_is_descrete(image):
         return get_discrete_datapoints_for_cc_matrix(ccm)
 
+
 def image_is_continuous(image):
     """ This will axis type from REV and return true if continuous"""
-    return False # TODO
+    return False  # TODO
+
 
 def image_is_descrete(image):
     """ This will axis type from REV and return true if discrete"""
-    return True # TODO
+    return True  # TODO
+
 
 def get_continuous_datapoints_for_cc_matrix(cc_matrix):
     """ Returns x, y datapoints for component  in JSON form """
-    [1,1] # TODO
+    [1, 1]  # TODO
+
 
 def get_discrete_datapoints_for_cc_matrix(cc_matrix):
     """ Returns x, y datapoints for component  in JSON form """
@@ -275,21 +318,26 @@ def get_discrete_datapoints_for_cc_matrix(cc_matrix):
     # y coords now unadjusted
     return x_y_coord_list
 
+
 def get_x_axis_labels():
-    #TODO
+    # TODO
     return ["1", "2", "3", "4"]
 
+
 def get_x_axis_width():
-    #TODO
+    # TODO
     return 900
+
 
 def get_y_axis_pixel_height():
     # TODO
     return 550
 
+
 def get_y_axis_val_max():
-    #TODO
+    # TODO
     return 1.2
+
 
 def get_x_label_positions(x_labels, x_width):
     """ gets coordinates of x axis labels in pixels """
@@ -303,6 +351,7 @@ def get_x_label_positions(x_labels, x_width):
 
     return label_positions
 
+
 def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
     cuts = []
     for pos in label_positions:
@@ -310,6 +359,7 @@ def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
         cuts.append(cut)
 
     return cuts
+
 
 def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
     pixel_coords = []
@@ -328,19 +378,20 @@ def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
 
     return y_coords
 
+
 def get_x_y_coord_list(x_labels, y_coords):
     x_y_coords = []
 
     for x, y in zip(x_labels, y_coords):
-        x_y_coords.append([x,y])
+        x_y_coords.append([x, y])
 
     return x_y_coords
+
 
 if __name__ == '__main__':
     # process_via_pipeline('images/line_graph_two.png')
     if DEBUG:
         clear_tmp_on_run()
-
 
     sets = get_all_datasets_for_image('images/line_graph_three.png')
 
