@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 plt.interactive(False)
-DEBUG = True
+DEBUG = False
 
 
 def clear_tmp_on_run():
@@ -100,10 +100,10 @@ def original_image_split_by_curves(original_image):
 def graphs_split_by_curve_colour(original_image):
     """
     for coloured graphs! ->
-        # first we pre-process the image
-            # only removing lines that aren't thick i.e graph lines
-        # then we get the amount of separate blobs from several cuts along the x axis and take the highest number
-        # ( to reduce chance of gap between dashes )
+        # first we pre-process the image                                                                            DONE_A
+            # only removing lines that aren't thick i.e graph lines                                                 DONE_B
+        # then we get the amount of separate blobs from several cuts along the x axis and take the highest number   DONE_B
+        # ( to reduce chance of gap between dashes )                                                                DONE_B
         # n_lines = 3 for instance
         # then we get the cut where n_lines was highest
         # then we get the central! pixel in each blob
@@ -113,16 +113,21 @@ def graphs_split_by_curve_colour(original_image):
         # then we have each graph to split_images array
         # repeat until n_lines is 0
     """
-    # first we pre-process the image
-    binary_image = preprocess_image(original_image)
-
+    # first we pre-process the image only removing lines that aren't thick i.e graph lines
     cleaned_image = clean_image(original_image)
+
+
+
+
+
+
+
 
     images_of_curves_split_by_colour = []
 
     h, w, chn = original_image.shape
 
-    seeds = get_seeds_from_image()
+    seeds = get_seeds_from_image(cleaned_image)
 
     floodflags = 4
     floodflags |= cv2.FLOODFILL_MASK_ONLY
@@ -145,8 +150,101 @@ def graphs_split_by_curve_colour(original_image):
     print "{0} coloured curves found.".format(len(images_of_curves_split_by_colour))
     return images_of_curves_split_by_colour  # because its sitting in to arrays
 
+def get_seeds_from_image(image):
+    # TODO: DROP SEEDS ON THE LINES
+    # should return an array of tuples containing coordinates where we are certain there is a unique line.
+
+    label_positions = get_x_label_positions(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
+    cuts = get_cuts_for_image(image, label_positions)
+
+    # get coordinate & append to seeds
+    seeds = get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions)
+
+    return seeds
+    # return (30, 30), (60, 60)asdasda
+
+def get_cuts_for_image(image, positions_to_cut):
+    # gets a number of vertical cuts at position to cut
+    cuts = []
+
+    # for each group
+    for pos in positions_to_cut:
+        # take a cut
+        cut = image[:, pos]
+        cuts.append(cut)
+
+    return cuts
+
+def get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions):
+    """
+    Get coordinates in pixels of wherever we see an edge in a cut
+    :param cuts:
+    :param label_positions
+    :return: array of coordinates, coordinate for each unique edge.
+    """
+    pixel_coords = []
+
+    array_of_edge_heights = []
+    for idx in range(len(cuts)):
+        # get list of all edge heights
+        while len(array_of_edge_heights) != len(cuts):
+            edge_heights = verticle_positions_of_edges_if_edges_present_in_cut(cuts[idx])
+            array_of_edge_heights.append(edge_heights)
+            idx+=1
+
+    # get cut
+    most_edges_in_cut_found = 0
+    cut_with_most_edges = None
+    index_of_cut_with_most_edges = 0
+    for edge_heights in array_of_edge_heights:
+
+        n_edges = len(edge_heights)
+        if n_edges > most_edges_in_cut_found:
+            most_edges_in_cut_found = n_edges
+            cut_with_most_edges = edge_heights
+            index_of_cut_with_most_edges = array_of_edge_heights.index(edge_heights)
+
+    for edge_height in cut_with_most_edges:
+        pixel_coords.append((label_positions[index_of_cut_with_most_edges], edge_height[0]))
+
+
+    return pixel_coords
+
+
+def verticle_position_of_edge_if_edge_present_in_cut(cut):
+    return cut.tolist().index(255) if sum(cut > 0) else False
+
+def verticle_positions_of_edges_if_edges_present_in_cut(cut):
+     # This must return an array of edge heights for the entire cut
+
+    idx = 0
+    ranges = []
+    while idx != len(cut):
+        if current_is_edge(cut[idx]):
+            range = get_index_range_of_current_edge(cut, idx)
+            ranges.append(range)
+            idx = range[1] # end is second part of tuple
+        else:
+            idx += 1
+
+    return ranges
+
+def current_is_edge(current):
+    return current != 0
+
+def get_index_range_of_current_edge(cut, start):
+    """ Returns tuple with range of current edge. should be between 0-10 usually"""
+    assert(current_is_edge(cut[start]))
+    end = start
+
+    # increment end ptr as long as we see a
+    while current_is_edge(cut[end]):
+        end+=1
+
+    return (start, end)
 
 def clean_image(image):
+    # TODO: implement crop to plot and uncomment below
     # image = crop_to_plot_area(image)
     image = remove_grid_lines(image)
 
@@ -172,13 +270,6 @@ def blur_image(image):
     blur_factor = 9
     kernel_large = np.ones((blur_factor, blur_factor), np.float32) / blur_factor ** 2
     return cv2.filter2D(image, -1, kernel_large)
-
-
-def get_seeds_from_image():
-    # TODO: DROP SEEDS ON THE LINES
-    # should return an array of tuples containing coordinates where we are certain there is a unique line.
-    return (30, 30), (60, 60)
-
 
 def graphs_split_by_curve_style(original_image):
     images_of_curves_split_by_style = []
@@ -215,7 +306,7 @@ def array_is_3D(image):
 
 def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=1000):
     """
-    Given a binary image containing many components, generate a matrix
+    Given a binary image containing many components, generate a cc_matrix
     containing only those components with min_connected_pixels, a.k.a remove
     small stuff
     :param binary_image:
@@ -285,7 +376,7 @@ def get_datapoints_from_ccm(image, ccm):
     if image_is_continuous(image):
         return get_continuous_datapoints_for_cc_matrix(ccm)
     if image_is_descrete(image):
-        return get_discrete_datapoints_for_cc_matrix(ccm)
+        return get_discrete_datapoints_for_cc_matrix(ccm, image)
 
 
 def image_is_continuous(image):
@@ -303,7 +394,7 @@ def get_continuous_datapoints_for_cc_matrix(cc_matrix):
     [1, 1]  # TODO
 
 
-def get_discrete_datapoints_for_cc_matrix(cc_matrix):
+def get_discrete_datapoints_for_cc_matrix(cc_matrix, image):
     """ Returns x, y datapoints for component  in JSON form """
 
     x_labels = get_x_axis_labels()
@@ -326,17 +417,17 @@ def get_x_axis_labels():
 
 def get_x_axis_width():
     # TODO
-    return 900
+    return 688
 
 
 def get_y_axis_pixel_height():
     # TODO
-    return 550
+    return 292
 
 
 def get_y_axis_val_max():
     # TODO
-    return 1.2
+    return 9
 
 
 def get_x_label_positions(x_labels, x_width):
@@ -352,6 +443,8 @@ def get_x_label_positions(x_labels, x_width):
     return label_positions
 
 
+
+
 def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
     cuts = []
     for pos in label_positions:
@@ -359,6 +452,7 @@ def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
         cuts.append(cut)
 
     return cuts
+
 
 
 def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
