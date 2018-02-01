@@ -62,6 +62,7 @@ def all_connected_component_matrices(original_image):
 
     for split_image in original_image_split_by_curves(original_image):
         # binary_image = preprocess_image(split_image)  # already a binary image
+        assert(len(split_image.shape) == 2)
         ccm = get_cc_matrix_from_binary_image(split_image)
 
         ccms.append(ccm)
@@ -139,18 +140,29 @@ def graphs_split_by_curve_colour(original_image):
         mask = np.zeros((h + 2, w + 2), np.uint8)
         num, im, mask, rect = cv2.floodFill(cleaned_image, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
 
-        mask = convert_mask_to_3D_image(mask)
+        # mask = convert_mask_to_3D_image(mask)
         #show_image(im)
         #show_image(mask)
         # Error thrown here because the mask is not the same shape as original image. i.e it is 2d not 3d. this
         # has knock on effects when the pipleline expects a 3d image.
-        if not (original_image.shape == mask.shape):
-            print "orignal_image shape: " + str(original_image.shape) + "\n" + "mask shape: " + str(mask.shape)
-            # assert(False)
+        # if not (original_image.shape == mask.shape):
+        #     print "orignal_image shape: " + str(original_image.shape) + "\n" + "mask shape: " + str(mask.shape)
+        #     # assert(False)
+        mask = remove_mask_border(mask=mask)
+
         images_of_curves_split_by_colour.append(mask)
 
     print "{0} coloured curves found.".format(len(images_of_curves_split_by_colour))
     return images_of_curves_split_by_colour  # because its sitting in to arrays
+
+def remove_mask_border(mask):
+    # remove the border of a mask as it will mess up the rest of pipeline
+
+    # check mask is correct shape (2D)
+    assert(len(mask.shape) == 2)
+
+    cropped_mask = mask[1:len(mask)-1,1:len(mask[0]-1)]
+    return cropped_mask
 
 def get_seeds_from_image(image):
     # TODO: DROP SEEDS ON THE LINES
@@ -467,7 +479,11 @@ def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
     # get pixel number where we first see our connected component
     # in our cut
     for idx in range(len(cuts)):
-        pixel_coords.append(cuts[idx].tolist().index(255))
+        pixel_coord = verticle_position_of_edge_if_edge_present_in_cut(cuts[idx])
+        if pixel_coord:
+            pixel_coords.append(pixel_coord)
+        # pixel_coords.append(cuts[idx].tolist().index(255))
+        # x = verticle_positions_of_edges_if_edges_present_in_cut(cuts[idx])
 
     # translate pixel coords to y value
     for coord in pixel_coords:
