@@ -1,6 +1,7 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 plt.interactive(False)
 DEBUG = False
@@ -226,7 +227,19 @@ def get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions):
 
 
 def verticle_position_of_edge_if_edge_present_in_cut(cut):
-    return cut.tolist().index(255) if sum(cut > 0) else False
+    # get the verticle position of the edges center
+    start_index = cut.tolist().index(255) if sum(cut > 0) else False
+    if start_index:
+        range_start, range_end = get_index_range_of_current_edge(cut, start_index)
+        center = (range_end - range_start) / 2
+        rounded_center = range_start + int(round(center, 0))
+
+        return rounded_center
+
+    else:
+        return start_index
+
+
 
 def verticle_positions_of_edges_if_edges_present_in_cut(cut):
      # This must return an array of edge heights for the entire cut
