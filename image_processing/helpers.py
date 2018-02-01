@@ -61,8 +61,8 @@ def all_connected_component_matrices(original_image):
     ccms = []
 
     for split_image in original_image_split_by_curves(original_image):
-        binary_image = preprocess_image(split_image)  # already a binary image
-        ccm = get_cc_matrix_from_binary_image(binary_image)
+        # binary_image = preprocess_image(split_image)  # already a binary image
+        ccm = get_cc_matrix_from_binary_image(split_image)
 
         ccms.append(ccm)
 
@@ -113,6 +113,7 @@ def graphs_split_by_curve_colour(original_image):
         # then we have each graph to split_images array
         # repeat until n_lines is 0
     """
+    binary_image = preprocess_image(original_image)
     # first we pre-process the image only removing lines that aren't thick i.e graph lines
     cleaned_image = clean_image(original_image)
 
@@ -136,10 +137,11 @@ def graphs_split_by_curve_colour(original_image):
     # create a mask from each seed which is
     for seed in seeds:
         mask = np.zeros((h + 2, w + 2), np.uint8)
-        num, im, mask, rect = cv2.floodFill(original_image, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
+        num, im, mask, rect = cv2.floodFill(cleaned_image, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
 
         mask = convert_mask_to_3D_image(mask)
-
+        #show_image(im)
+        #show_image(mask)
         # Error thrown here because the mask is not the same shape as original image. i.e it is 2d not 3d. this
         # has knock on effects when the pipleline expects a 3d image.
         if not (original_image.shape == mask.shape):
@@ -304,7 +306,7 @@ def array_is_3D(image):
     return len(image.shape) == 3
 
 
-def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=1000):
+def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
     """
     Given a binary image containing many components, generate a cc_matrix
     containing only those components with min_connected_pixels, a.k.a remove
@@ -319,8 +321,10 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=1000):
     connected_components = measure.label(binary_image, background=0, neighbors=8)
     cc_matrix = np.zeros(binary_image.shape, dtype="uint8")
 
+
+
     for component in np.unique(connected_components):
-        # ignore background component
+        # ignore black component
         if component == 0: continue
 
         # otherwise, construct the component mask and count the
