@@ -35,14 +35,34 @@ def process_via_pipeline(image_name):
     # be inferred based on the some heuristic, maybe x axis width?
 
 
-def get_all_datasets_for_image(image_name):
+
+
+def get_all_datasets_for_image_with_name(image_name):
+    """
+    >>> get_all_datasets_for_image_with_name('images/simple_demo_1.png')
+    1 coloured curves found.
+    {'A': {'1': 3.7910958904109595, '3': 3.7910958904109595, '2': 3.7910958904109595}}
+    >>> get_all_datasets_for_image_with_name(1)
+    Traceback (most recent call last):
+        ...
+    ValueError: image_name must be a string
+
+
+    :param image_name:
+    :return:
+    """
+    if type(image_name) != str:
+        raise ValueError("image_name must be a string")
+
+
     datasets = []
     image = cv2.imread(image_name)
 
     for ccm in all_connected_component_matrices(image):
         datasets += get_datapoints_from_ccm(image, ccm)
 
-    return datasets
+    dict = format_dataset_to_dictionary(datasets)
+    return dict
 
 
 def all_connected_component_matrices(original_image):
@@ -220,7 +240,7 @@ def get_discrete_datapoints_for_cc_matrix(cc_matrix, image):
     x_y_coord_list = get_x_y_coord_list(x_labels, y_coords)
 
     # y coords now unadjusted
-    return x_y_coord_list
+    return [ x_y_coord_list ]
 
 
 def get_x_label_positions(x_labels, x_width):
@@ -285,6 +305,8 @@ def tests():
         print(image + ': ', get_all_datasets_for_image('images/' + image))
 
 if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
     # process_via_pipeline('images/line_graph_two.png')
     if DEBUG:
         clear_tmp_on_run()
