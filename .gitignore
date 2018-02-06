@@ -112,3 +112,4 @@ venv.bak/
 .idea/vcs.xml
 .idea/workspace.xml
 image_processing/scratchpad.py
+.pytest_cache/v/cache/lastfailed
