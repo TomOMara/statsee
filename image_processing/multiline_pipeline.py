@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 plt.interactive(False)
-DEBUG = False
 
+RUN_TESTS = False
 
 
 def process_via_pipeline(image_name):
@@ -53,7 +53,6 @@ def get_all_datasets_for_image_with_name(image_name):
     """
     if type(image_name) != str:
         raise ValueError("image_name must be a string")
-
 
     datasets = []
     image = cv2.imread(image_name)
@@ -301,17 +300,29 @@ def tests():
               'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
               'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
 
+    # images = [ 'double_demo_two.png']
+
     for image in images:
-        print(image + ': ', get_all_datasets_for_image('images/' + image))
+        print(image + '\n')
+        datasets = get_all_datasets_for_image_with_name('images/' + image)
+        for curve in datasets:
+            # curve is an array of points which are (x, y)
+
+            print('curve ' + str(datasets.index(curve)) + '')
+            for coordinate in curve:
+                print('\t '  + coordinate[0] + ' : ' + str(coordinate[1]))
+
+        show_image('images/' + image)
+
 
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-    # process_via_pipeline('images/line_graph_two.png')
-    if DEBUG:
-        clear_tmp_on_run()
-        tests()
 
-    sets = get_all_datasets_for_image('images/line_graph_three.png')
+    if RUN_TESTS:
+        clear_tmp_on_run()
+        #tests()
+
+    sets = get_all_datasets_for_image_with_name('images/line_graph_three.png')
 
     print('sets: ', sets)
