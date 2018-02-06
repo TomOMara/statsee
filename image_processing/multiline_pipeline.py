@@ -274,11 +274,21 @@ def get_x_y_coord_list(x_labels, y_coords):
 
     return x_y_coords
 
+def tests():
+
+
+    images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_three.png', 'simple_demo_4.png',
+              'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
+              'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
+
+    for image in images:
+        print(image + ': ', get_all_datasets_for_image('images/' + image))
 
 if __name__ == '__main__':
     # process_via_pipeline('images/line_graph_two.png')
     if DEBUG:
         clear_tmp_on_run()
+        tests()
 
     sets = get_all_datasets_for_image('images/line_graph_three.png')
 
