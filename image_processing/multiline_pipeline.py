@@ -290,7 +290,7 @@ def get_x_y_coord_list(x_labels, y_coords):
     x_y_coords = []
 
     for x, y in zip(x_labels, y_coords):
-        x_y_coords.append([x, y])
+        x_y_coords.append((x, y))
 
     return x_y_coords
 
