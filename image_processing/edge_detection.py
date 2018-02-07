@@ -1,0 +1,96 @@
+
+
+def get_cuts_for_image(image, positions_to_cut):
+    # gets a number of vertical cuts at position to cut
+    cuts = []
+
+    # for each group
+    for pos in positions_to_cut:
+        # take a cut
+        cut = image[:, pos]
+        cuts.append(cut)
+
+    return cuts
+
+def get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions):
+    """
+    Get coordinates in pixels of wherever we see an edge in a cut
+    :param cuts:
+    :param label_positions
+    :return: array of coordinates, coordinate for each unique edge.
+    """
+    pixel_coords = []
+
+    array_of_edge_heights = []
+    for idx in range(len(cuts)):
+        # get list of all edge heights
+        while len(array_of_edge_heights) != len(cuts):
+            edge_heights = verticle_positions_of_edges_if_edges_present_in_cut(cuts[idx])
+            array_of_edge_heights.append(edge_heights)
+            idx+=1
+
+    # get cut
+    most_edges_in_cut_found = 0
+    cut_with_most_edges = None
+    index_of_cut_with_most_edges = 0
+    for edge_heights in array_of_edge_heights:
+
+        n_edges = len(edge_heights)
+        if n_edges > most_edges_in_cut_found:
+            most_edges_in_cut_found = n_edges
+            cut_with_most_edges = edge_heights
+            index_of_cut_with_most_edges = array_of_edge_heights.index(edge_heights)
+
+    if not cut_with_most_edges:
+        return None
+
+    for edge_height in cut_with_most_edges:
+        pixel_coords.append((label_positions[index_of_cut_with_most_edges], edge_height[0]))
+
+
+    return pixel_coords
+
+
+def verticle_position_of_edge_if_edge_present_in_cut(cut):
+    # get the verticle position of the edges center
+    start_index = cut.tolist().index(255) if sum(cut > 0) else False
+    if start_index:
+        range_start, range_end = get_index_range_of_current_edge(cut, start_index)
+        center = (range_end - range_start) / 2
+        rounded_center = range_start + int(round(center, 0))
+
+        return rounded_center
+
+    else:
+        return start_index
+
+
+
+def verticle_positions_of_edges_if_edges_present_in_cut(cut):
+    # This must return an array of edge heights for the entire cut
+
+    idx = 0
+    ranges = []
+    while idx != len(cut):
+        if current_is_edge(cut[idx]):
+            range = get_index_range_of_current_edge(cut, idx)
+            ranges.append(range)
+            idx = range[1]  # end is second part of tuple
+        else:
+            idx += 1
+
+    return ranges
+
+def current_is_edge(current):
+    return current != 0
+
+def get_index_range_of_current_edge(cut, start):
+    """ Returns tuple with range of current edge. should be between 0-10 usually"""
+    assert(current_is_edge(cut[start]))
+    end = start
+
+    # increment end ptr as long as we see a
+    while current_is_edge(cut[end]):
+        end += 1
+
+    return (start, end)
