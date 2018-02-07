@@ -41,6 +41,9 @@ def get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions):
             cut_with_most_edges = edge_heights
             index_of_cut_with_most_edges = array_of_edge_heights.index(edge_heights)
 
+    if not cut_with_most_edges:
+        return None
+
     for edge_height in cut_with_most_edges:
         pixel_coords.append((label_positions[index_of_cut_with_most_edges], edge_height[0]))
 

@@ -25,16 +25,27 @@ def format_dataset_to_dictionary(datasets):
         ...
     ValueError: curve coordinate should be a tuple
 
+    >>> dataset = []
+    >>> format_dataset_to_dictionary(dataset)
+    Traceback (most recent call last):
+        ...
+    ValueError: dataset should not be empty
+
     :param datasets:
     :return:
     """
 
-
     if not isinstance(datasets, list):
         raise ValueError("dataset should be a list")
 
+    if len(datasets) == 0:
+        raise ValueError("dataset should not be empty")
+
     if not isinstance(datasets[0], list):
         raise ValueError("dataset curve should be a list")
+
+    if not datasets[0]:
+        raise ValueError("couldn't parse dotted line")
 
     if not isinstance(datasets[0][0], tuple):
         raise ValueError("curve coordinate should be a tuple")

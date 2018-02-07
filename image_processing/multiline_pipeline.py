@@ -8,7 +8,7 @@ import numpy as np
 
 plt.interactive(False)
 
-RUN_TESTS = False
+RUN_TESTS = True
 
 
 def process_via_pipeline(image_name):
@@ -46,7 +46,10 @@ def get_all_datasets_for_image_with_name(image_name):
     Traceback (most recent call last):
         ...
     ValueError: image_name must be a string
-
+    >>> get_all_datasets_for_image_with_name('images/blank.png')
+    Traceback (most recent call last):
+        ...
+    Exception: couldn't get any connected components for images/blank.png
 
     :param image_name:
     :return:
@@ -57,8 +60,18 @@ def get_all_datasets_for_image_with_name(image_name):
     datasets = []
     image = cv2.imread(image_name)
 
-    for ccm in all_connected_component_matrices(image):
-        datasets += get_datapoints_from_ccm(image, ccm)
+    all_ccms = all_connected_component_matrices(image)
+
+    if not all_ccms:
+        raise Exception("couldn't get any connected components for " + image_name)
+
+    for ccm in all_ccms:
+        dataset = get_datapoints_from_ccm(image, ccm)
+
+        if dataset == []:
+            return []
+
+        datasets += dataset
 
     dict = format_dataset_to_dictionary(datasets)
     return dict
@@ -68,7 +81,11 @@ def all_connected_component_matrices(original_image):
     """ returns array of all connected component matrices """
     ccms = []
 
-    for split_image in original_image_split_by_curves(original_image):
+    split_images = original_image_split_by_curves(original_image)
+
+    if not split_images: return None
+
+    for split_image in split_images:
         # binary_image = preprocess_image(split_image)  # already a binary image
         assert (len(split_image.shape) == 2)
         ccm = get_cc_matrix_from_binary_image(split_image)
@@ -89,7 +106,11 @@ def original_image_split_by_curves(original_image):
     # split_images.append(graphs_split_by_curve_colour(original_image) +
     #                      graphs_split_by_curve_style(original_image))
 
-    for split_image in graphs_split_by_curve_colour(original_image):
+    images_split_by_curve_colour = graphs_split_by_curve_colour(original_image)
+
+    if not images_split_by_curve_colour: return None
+
+    for split_image in images_split_by_curve_colour:
         split_images.append(split_image)
 
     # TODO: loop again over graphs split by curve style..
@@ -131,6 +152,8 @@ def graphs_split_by_curve_colour(original_image):
     h, w, chn = original_image.shape
 
     seeds = get_seeds_from_image(cleaned_image)
+
+    if not seeds: return None
 
     floodflags = 4
     floodflags |= cv2.FLOODFILL_MASK_ONLY
@@ -299,21 +322,17 @@ def tests():
     images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_three.png', 'simple_demo_4.png',
               'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
               'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
-
-    # images = [ 'double_demo_two.png']
+    #
+    # images = ['double_demo_four.png']
 
     for image in images:
         print(image + '\n')
-        datasets = get_all_datasets_for_image_with_name('images/' + image)
-        for curve in datasets:
-            # curve is an array of points which are (x, y)
 
-            print('curve ' + str(datasets.index(curve)) + '')
-            for coordinate in curve:
-                print('\t '  + coordinate[0] + ' : ' + str(coordinate[1]))
-
-        show_image('images/' + image)
-
+        try:
+            datasets = get_all_datasets_for_image_with_name('images/' + image)
+            print('datasets: ', datasets)
+        except ValueError as e:
+            print("Error: " + e.message + " couldn't complete " + image)
 
 if __name__ == '__main__':
     import doctest
@@ -321,7 +340,7 @@ if __name__ == '__main__':
 
     if RUN_TESTS:
         clear_tmp_on_run()
-        #tests()
+        tests()
 
     sets = get_all_datasets_for_image_with_name('images/line_graph_three.png')
 
