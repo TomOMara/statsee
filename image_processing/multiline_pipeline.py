@@ -346,7 +346,7 @@ class MultilinePipeline:
         # translate pixel coords to y value
         for coord in pixel_coords:
             y_value = y_val_max - (coord * units_per_pixel)
-            y_coords.append(y_value)
+            y_coords.append(round(y_value, 2))
 
         return y_coords
 
