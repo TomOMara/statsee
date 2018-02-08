@@ -73,7 +73,7 @@ def format_dataset_to_dictionary(datasets):
     """
     >>> dataset = [[('1', 3.791), ('2', 3.791), ('3', 3.791)]]
     >>> format_dataset_to_dictionary(dataset)
-    {'A': {'1': 3.791, '3': 3.791, '2': 3.791}}
+    {'A': {'1': 3.791, '2': 3.791, '3': 3.791}}
 
     >>> dataset = ('1', 3.791)
     >>> format_dataset_to_dictionary(dataset)
