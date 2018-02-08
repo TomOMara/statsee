@@ -10,18 +10,18 @@ def expand_data_array(data_array, factor):
 
 
     >>> expand_data_array([1,2,3,4], 2)
-    [1,1.5,2,2.5,3,3.5,4]
+    [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
 
     >>> expand_data_array([1,2,3,4], 3)
-    [1,1.33,1.66,2,2.33,2.66,3,3.33,3.66,4]
+    [1.0, 1.33, 1.67, 2.0, 2.33, 2.67, 3.0, 3.33, 3.67, 4.0]
 
     >>> expand_data_array(["1","2","3","4"], 2)
-    ["1","1.5","2","2.5","3","3.5","4"]
+    ['1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0']
 
     >>> expand_data_array(["Jan","Feb","March"], 2)
     Traceback (most recent call last):
         ...
-    ValueError: Jan cant be casted to int
+    ValueError: ['Jan', 'Feb', 'March'] cant be casted to int
 
     >>> expand_data_array([1], 2)
     Traceback (most recent call last):
@@ -36,11 +36,12 @@ def expand_data_array(data_array, factor):
     if len(data_array) < 2:
         raise ValueError("cant expand arrays less than 2 long")
 
+    original_array = data_array
     # cast everything to an int
     try:
         data_array = [int(item) for item in data_array]
-    except:
-        ValueError(str(data_array) + " cant be casted to int")
+    except ValueError as e:
+        raise ValueError(str(data_array) + " cant be casted to int")
 
 
 
@@ -59,8 +60,10 @@ def expand_data_array(data_array, factor):
             expanded_array.append( round(num + increment, 2))
             ctr += 1
 
+    # add the last element back into array
+    expanded_array.append(float(data_array.pop()))
     # convert input back to strings if it was a string
-    if isinstance(data_array[0], str):
+    if isinstance(original_array[0], str):
         expanded_array = [str(item) for item in expanded_array]
 
     # ensure that we have more cut positions than we started with.
@@ -71,9 +74,14 @@ def expand_data_array(data_array, factor):
 
 def format_dataset_to_dictionary(datasets):
     """
+
+    >>> dataset = [[('1', 3), ('2', 3), ('3', 3)], [('x', 4), ('y', 4), ('z', 4)]]
+    >>> format_dataset_to_dictionary(dataset)
+    {'A': {'1': 3, '3': 3, '2': 3}, 'B': {'y': 4, 'x': 4, 'z': 4}}
+
     >>> dataset = [[('1', 3.791), ('2', 3.791), ('3', 3.791)]]
     >>> format_dataset_to_dictionary(dataset)
-    {'A': {'1': 3.791, '2': 3.791, '3': 3.791}}
+    {'A': {'1': 3.791, '3': 3.791, '2': 3.791}}
 
     >>> dataset = ('1', 3.791)
     >>> format_dataset_to_dictionary(dataset)
@@ -103,6 +111,7 @@ def format_dataset_to_dictionary(datasets):
     :return:
     """
 
+
     if not isinstance(datasets, list):
         raise ValueError("dataset should be a list")
 
@@ -128,15 +137,7 @@ def format_dataset_to_dictionary(datasets):
         for coord in curve:
             curve_dict[coord[0]] = coord[1]
 
-        # Add each curve to dataset_dict and assign it 'possible_curve_key' as key
-        for curve_key in possible_curve_keys:
-
-            # If there are no more datasets left to assign a curve key to break
-            if possible_curve_keys.index(curve_key) >= len(datasets): break
-
-            # If key not already present in the dict, add it
-            if dataset_dict.get(curve_key) == None:
-                dataset_dict[curve_key] = curve_dict
+        dataset_dict[possible_curve_keys.pop(0)] = curve_dict
 
     return dataset_dict
 
