@@ -30,7 +30,6 @@ class MultilinePipeline:
 
         try:
             datasets = self.get_all_datasets_for_image_with_name('images/' + image_name)
-            # print_datasets(datasets)
 
             self.inject_line_data_into_file_with_name(json_name, datasets)
             datasets = json.dumps(datasets, sort_keys=True)
