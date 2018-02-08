@@ -8,12 +8,12 @@ def get_x_axis_labels():
 
 def get_x_axis_width():
     # TODO
-    return 688
+    return 813
 
 
 def get_y_axis_pixel_height():
     # TODO
-    return 292
+    return 362
 
 
 def get_y_axis_val_max():
