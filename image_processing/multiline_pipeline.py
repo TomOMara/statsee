@@ -5,6 +5,8 @@ from json_parser import *
 from graph_cutter import get_averaged_x_label_anchors
 import matplotlib.pyplot as plt
 import numpy as np
+import json
+from image_json_pair import ImageJsonPair
 
 plt.interactive(False)
 
@@ -14,23 +16,28 @@ class MultilinePipeline:
     input_filenames = []
     parse_resolution = 3
 
-    def __init__(self, input_filenames, parse_resolution, should_run_tests=False):
+    def __init__(self, image_json_pair, parse_resolution, should_run_tests=False):
         self.should_run_tests = should_run_tests
         self.parse_resolution = parse_resolution
-        self.input_filenames = input_filenames
+        self.image_json_pair = image_json_pair
 
     def run(self):
-        if not self.input_filenames:
+        if not self.image_json_pair:
             raise ValueError("No input files")
 
-        for image in self.input_filenames:
-            print(image + '\n')
+        image_name = self.image_json_pair.get_image_name()
+        json_name = self.image_json_pair.get_json_name()
 
-            try:
-                datasets = self.get_all_datasets_for_image_with_name('images/' + image)
-                print('datasets: ', datasets)
-            except ValueError as e:
-                print("Error: " + e.message + " couldn't complete " + image)
+        try:
+            datasets = self.get_all_datasets_for_image_with_name('images/' + image_name)
+            # print_datasets(datasets)
+
+            self.inject_line_data_into_file_with_name(json_name, datasets)
+            datasets = json.dumps(datasets, sort_keys=True)
+            print(datasets)
+        except ValueError as e:
+            print("Error: " + e.message + " couldn't complete " + image_name)
+
     def inject_line_data_into_file_with_name(self, file_name, dataset):
         """
         Loads a json file and injects data into json file, along with error information
@@ -72,10 +79,10 @@ class MultilinePipeline:
 
     def get_all_datasets_for_image_with_name(self, image_name):
         """
-        >>> pipeline = MultilinePipeline(['images/simple_demo_1.png'], parse_resolution=3)
+        >>> pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('images/simple_demo_1.png', 'json/simple_demo_1.json'), parse_resolution=3)
         >>> pipeline.get_all_datasets_for_image_with_name('images/simple_demo_1.png')
         1 coloured curves found.
-        {'A': {'1': 3.7910958904109595, '3': 3.7910958904109595, '2': 3.7910958904109595}}
+        {'A': {'1': 4.8, '3': 4.8, '2': 4.8}}
         >>> pipeline.get_all_datasets_for_image_with_name(1)
         Traceback (most recent call last):
             ...
@@ -271,12 +278,12 @@ class MultilinePipeline:
 
     def image_is_continuous(self, image):
         """ This will axis type from REV and return true if continuous"""
-        return True  # TODO
+        return False  # TODO
 
 
     def image_is_descrete(self, image):
         """ This will axis type from REV and return true if discrete"""
-        return False  # TODO
+        return True  # TODO
 
 
     def get_continuous_datapoints_for_cc_matrix(self, cc_matrix):
@@ -400,8 +407,8 @@ if __name__ == '__main__':
                   'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
                   'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
 
-    pipeline = MultilinePipeline(input_filenames=test_images, parse_resolution=2, should_run_tests=False)
-    pipeline.run()
-    # sets = pipeline.get_all_datasets_for_image_with_name('images/line_graph_three.png')
+    # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
+    # pipeline.run()
 
-    # print('sets: ', sets)
+    pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('simple_demo_1.png', 'json/simple_demo_1.json'), parse_resolution=2, should_run_tests=False)
+    pipeline.run()
