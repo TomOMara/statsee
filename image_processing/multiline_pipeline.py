@@ -2,7 +2,7 @@ from helpers import *
 from preprocessing import *
 from edge_detection import *
 from json_parser import *
-
+from graph_cutter import get_averaged_x_label_anchors
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,10 +12,9 @@ plt.interactive(False)
 class MultilinePipeline:
 
     input_filenames = []
-    parse_resolution = 5
-    should_run_tests = False
+    parse_resolution = 3
 
-    def __init__(self, input_filenames, parse_resolution, should_run_tests):
+    def __init__(self, input_filenames, parse_resolution, should_run_tests=False):
         self.should_run_tests = should_run_tests
         self.parse_resolution = parse_resolution
         self.input_filenames = input_filenames
@@ -62,7 +61,7 @@ class MultilinePipeline:
 
     def get_all_datasets_for_image_with_name(self, image_name):
         """
-        >>> pipeline = MultilinePipeline(['images/simple_demo_1.png'], parse_resolution=5)
+        >>> pipeline = MultilinePipeline(['images/simple_demo_1.png'], parse_resolution=3)
         >>> pipeline.get_all_datasets_for_image_with_name('images/simple_demo_1.png')
         1 coloured curves found.
         {'A': {'1': 3.7910958904109595, '3': 3.7910958904109595, '2': 3.7910958904109595}}
@@ -209,7 +208,8 @@ class MultilinePipeline:
         :return: coordinates of lines in seeds
         """
 
-        label_positions = self.get_x_label_positions(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
+        label_positions = get_averaged_x_label_anchors(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
+        # label_positions = self.get_x_label_positions(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
         cuts = get_cuts_for_image(image, label_positions)
 
         # get coordinate & append to seeds
@@ -260,27 +260,35 @@ class MultilinePipeline:
 
     def image_is_continuous(self, image):
         """ This will axis type from REV and return true if continuous"""
-        return False  # TODO
+        return True  # TODO
 
 
     def image_is_descrete(self, image):
         """ This will axis type from REV and return true if discrete"""
-        return True  # TODO
+        return False  # TODO
 
 
     def get_continuous_datapoints_for_cc_matrix(self, cc_matrix):
         """ Returns x, y datapoints for component  in JSON form """
-        [1, 1]  # TODO
+        x_labels, x_width, y_pixel_height, y_val_max = self.get_graph_labels_and_size()
 
+        label_positions = get_averaged_x_label_anchors(x_width, x_labels)
+        cuts = self.get_more_x_axis_cuts_from_ccm(label_positions, cc_matrix)
+        y_coords = self.get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height)
+        x_labels = expand_data_array(x_labels, self.parse_resolution)
+        x_y_coord_list = self.get_x_y_coord_list(x_labels, y_coords)
+
+        # y coords now unadjusted
+        return [x_y_coord_list]
+
+    def get_graph_labels_and_size(self):
+        return get_x_axis_labels(), get_x_axis_width(), get_y_axis_pixel_height(), get_y_axis_val_max()
 
     def get_discrete_datapoints_for_cc_matrix(self, cc_matrix, image):
         """ Returns x, y datapoints for component  in JSON form """
+        x_labels, x_width, y_pixel_height, y_val_max = self.get_graph_labels_and_size()
 
-        x_labels = get_x_axis_labels()
-        x_width = get_x_axis_width()
-        y_pixel_height = get_y_axis_pixel_height()
-        y_val_max = get_y_axis_val_max()
-        label_positions = self.get_x_label_positions(x_labels, x_width)
+        label_positions = get_averaged_x_label_anchors(x_width, x_labels)
         cuts = self.get_x_axis_cuts_from_ccm(label_positions, cc_matrix)
         y_coords = self.get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height)
         x_y_coord_list = self.get_x_y_coord_list(x_labels, y_coords)
@@ -291,7 +299,7 @@ class MultilinePipeline:
 
     def get_x_label_positions(self, x_labels, x_width):
         """ gets coordinates of x axis labels in pixels """
-        from math import ceil
+        from math import ceil, floor
         label_positions = []
         n_slices = len(x_labels) - 1
 
@@ -300,10 +308,18 @@ class MultilinePipeline:
 
         return label_positions
 
+    def get_more_x_axis_cuts_from_ccm(self, label_positions, cc_matrix):
+
+        cuts = []
+        for pos in expand_data_array(label_positions, self.parse_resolution):
+            cut = cc_matrix[:, int(pos)]
+            cuts.append(cut)
+
+        return cuts
+
 
     def get_x_axis_cuts_from_ccm(self, label_positions, cc_matrix):
 
-        # number_of_cuts = ENV['GRAPH_RESOLUTION']
 
         cuts = []
         for pos in label_positions:
@@ -373,7 +389,7 @@ if __name__ == '__main__':
                   'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
                   'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
 
-    pipeline = MultilinePipeline(input_filenames=test_images, parse_resolution=5, should_run_tests=False)
+    pipeline = MultilinePipeline(input_filenames=test_images, parse_resolution=2, should_run_tests=False)
     pipeline.run()
     # sets = pipeline.get_all_datasets_for_image_with_name('images/line_graph_three.png')
 
