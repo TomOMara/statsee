@@ -31,6 +31,17 @@ class MultilinePipeline:
                 print('datasets: ', datasets)
             except ValueError as e:
                 print("Error: " + e.message + " couldn't complete " + image)
+    def inject_line_data_into_file_with_name(self, file_name, dataset):
+        """
+        Loads a json file and injects data into json file, along with error information
+        """
+        with open(file_name) as f:
+            json_data = json.load(f)
+
+        json_data.update(dataset)
+
+        with open('out/' + file_name, 'w+') as f:
+            json.dump(json_data, f, indent=4, separators=(',', ': '))
 
 
     def process_via_pipeline(self, image_name):
