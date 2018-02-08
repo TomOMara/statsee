@@ -50,32 +50,6 @@ class MultilinePipeline:
             json.dump(json_data, f, indent=4, separators=(',', ': '))
 
 
-    def process_via_pipeline(self, image_name):
-        image = cv2.imread(image_name)
-        gray_image = grayscale_image(image)
-        binary_image = binarize_image(gray_image)
-
-        connected_component_matrix = self.get_cc_matrix_from_binary_image(binary_image)
-
-        print(connected_component_matrix)
-
-        print('ccm count: ', cv2.countNonZero(connected_component_matrix))
-        print('ccm shape:', connected_component_matrix.shape)
-
-        # get a matrix for every line identified in the original image
-
-        # for each matrix with a connected component
-
-        # I think now we have the shape (width and height), the next
-        # logical step is to break separate it into X columns where X is the
-        # number of categoryies on the X axis (IF THE DATA ISNT CONTINUES)
-
-        # If the data is continuous, the number of vertical slices will have to
-        # be inferred based on the some heuristic, maybe x axis width?
-
-
-
-
     def get_all_datasets_for_image_with_name(self, image_name):
         """
         >>> pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('images/simple_demo_1.png', 'json/simple_demo_1.json'), parse_resolution=3)
@@ -282,7 +256,7 @@ class MultilinePipeline:
 
     def image_is_descrete(self, image):
         """ This will axis type from REV and return true if discrete"""
-        return True  # TODO
+        return True # TODO
 
 
     def get_continuous_datapoints_for_cc_matrix(self, cc_matrix):
@@ -383,7 +357,6 @@ class MultilinePipeline:
                   'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
                   'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
         #
-        # images = ['double_demo_four.png']
 
         for image in images:
             print(image + '\n')
@@ -405,9 +378,13 @@ if __name__ == '__main__':
     test_images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_three.png', 'simple_demo_4.png',
                   'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
                   'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
+    # test_images = ['double_demo_one.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
+    pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('simple_demo_1.png', 'json/simple_demo_1.json'),
+                                 parse_resolution=2, should_run_tests=False)
 
-    pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('simple_demo_1.png', 'json/simple_demo_1.json'), parse_resolution=2, should_run_tests=False)
-    pipeline.run()
+    for image in test_images:
+        pipeline = MultilinePipeline(image_json_pair=ImageJsonPair(image, 'json/simple_demo_1.json'), parse_resolution=2, should_run_tests=False)
+        pipeline.run()
