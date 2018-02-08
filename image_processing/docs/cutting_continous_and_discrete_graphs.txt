@@ -1,0 +1,12 @@
+This document describes a design decision made on 7/02/2018
+
+Consider graph A has six labels on its x axis, "0", "1", "2", "3", "4", "5"
+Consider graph A has a width of 100px
+
+With that information, now consider getting the exact x value for a given label, say "2", for both a discrete and continuous graph.
+
+Assuming the graph is counting from 0, there would be a label every 20px, i.e. 0:0px, 1:20px, 2:40px, 3:60px, 4:80px, 5:100px. Therefore we could say the label 2 is 20px along the x axis.
+
+Now consider graph B which has five labels, "1", "2", "3", "4", "5" and is 100px accross. It is now impossible to know exactly how far along in px the label "2" appears on the x axis, as we have no anchor point 0 to start from. The graph could implicitly start from zero, or start from one with a 10px gap. but assuming either is these will lead to errors in the opposing case.
+
+Because of this, we now adjust the x coordinates of cuts for labels which dont start at 0. The adjustment takes the cut between the middle of the x position of a centered and uncentered label. e.g assuming distance between labels is 100px, for a graph whose first label is at 100px, whose labels are non centered, the first cut would be at 75px. for a graph whose first label is at 50px because labels are centered, we take the cut at 75px also.
