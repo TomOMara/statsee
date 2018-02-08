@@ -1,6 +1,74 @@
 import cv2
 
 
+def expand_data_array(data_array, factor):
+    """
+    This takes a array of some length N and produces another larger array of length M where
+    M > N and the delta between each element of the array (must cast to integers/floats)
+    is the same (excluding rounding).
+    Will not work on dates unless they are converted into timestamps first.
+
+
+    >>> expand_data_array([1,2,3,4], 2)
+    [1,1.5,2,2.5,3,3.5,4]
+
+    >>> expand_data_array([1,2,3,4], 3)
+    [1,1.33,1.66,2,2.33,2.66,3,3.33,3.66,4]
+
+    >>> expand_data_array(["1","2","3","4"], 2)
+    ["1","1.5","2","2.5","3","3.5","4"]
+
+    >>> expand_data_array(["Jan","Feb","March"], 2)
+    Traceback (most recent call last):
+        ...
+    ValueError: Jan cant be casted to int
+
+    >>> expand_data_array([1], 2)
+    Traceback (most recent call last):
+        ...
+    ValueError: cant expand arrays less than 2 long
+
+
+    :param data_array:
+    :return:
+    """
+
+    if len(data_array) < 2:
+        raise ValueError("cant expand arrays less than 2 long")
+
+    # cast everything to an int
+    try:
+        data_array = [int(item) for item in data_array]
+    except:
+        ValueError(str(data_array) + " cant be casted to int")
+
+
+
+    expanded_array = []
+    distance_between_data = data_array[1] - data_array[0]
+
+
+    # factor must be an int
+    assert (isinstance(factor, int))
+
+    # loop over label positions, finding an inbetween point and adding to final positions
+    for num in data_array[:-1]:
+        ctr = 0
+        while ctr != factor:
+            increment = (distance_between_data / float(factor)) * ctr
+            expanded_array.append( round(num + increment, 2))
+            ctr += 1
+
+    # convert input back to strings if it was a string
+    if isinstance(data_array[0], str):
+        expanded_array = [str(item) for item in expanded_array]
+
+    # ensure that we have more cut positions than we started with.
+    assert (len(expanded_array) > len(data_array))
+
+    return expanded_array
+
+
 def format_dataset_to_dictionary(datasets):
     """
     >>> dataset = [[('1', 3.791), ('2', 3.791), ('3', 3.791)]]
