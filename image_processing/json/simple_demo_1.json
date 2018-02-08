@@ -1,0 +1,37 @@
+{
+  "width": 994,
+  "height": 570,
+  "title": "F Score Noun frequencies",
+  "chart_type": "LineGraph",
+  "mark": "line",
+  "series": [
+    { "name": "A", "value": [[1,1],[2,2],[3,3]] }
+  ],
+  "encoding": {
+    "x": {
+      "field": "Noun Frequency",
+      "type": "quantitative",
+      "axis": { "title": "Noun Frequency" },
+      "scale": {
+        "type": "log",
+        "labels": [ "10", "100", "1000", "10000", "100000", "1e+06" ],
+        "values": [ 10, 100, 1000, 10000, 100000, 1000000 ],
+        "domain": [ 10, 1000000 ],
+        "range": [ 231, 844 ]
+      }
+    },
+    "y": {
+      "field": "F-score",
+      "type": "quantitative",
+      "axis": { "title": "F-Score" },
+      "scale": {
+        "type": "linear",
+        "labels": [ "0", "0.1", "...", "0.8", "0.9" ],
+        "values": [ 0, 0.1, 0.2, "...", 0.8, 0.9 ],
+        "domain": [ 0, 0.9 ],
+        "range": [ 464, 20 ]
+      }
+    }
+  }
+}
+

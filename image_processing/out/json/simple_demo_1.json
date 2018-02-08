@@ -1,0 +1,100 @@
+{
+    "A": {
+        "1": 4.8,
+        "3": 4.8,
+        "2": 4.8
+    },
+    "title": "F Score Noun frequencies",
+    "series": [
+        {
+            "name": "A",
+            "value": [
+                [
+                    1,
+                    1
+                ],
+                [
+                    2,
+                    2
+                ],
+                [
+                    3,
+                    3
+                ]
+            ]
+        }
+    ],
+    "encoding": {
+        "y": {
+            "field": "F-score",
+            "scale": {
+                "values": [
+                    0,
+                    0.1,
+                    0.2,
+                    "...",
+                    0.8,
+                    0.9
+                ],
+                "domain": [
+                    0,
+                    0.9
+                ],
+                "labels": [
+                    "0",
+                    "0.1",
+                    "...",
+                    "0.8",
+                    "0.9"
+                ],
+                "type": "linear",
+                "range": [
+                    464,
+                    20
+                ]
+            },
+            "type": "quantitative",
+            "axis": {
+                "title": "F-Score"
+            }
+        },
+        "x": {
+            "field": "Noun Frequency",
+            "scale": {
+                "values": [
+                    10,
+                    100,
+                    1000,
+                    10000,
+                    100000,
+                    1000000
+                ],
+                "domain": [
+                    10,
+                    1000000
+                ],
+                "labels": [
+                    "10",
+                    "100",
+                    "1000",
+                    "10000",
+                    "100000",
+                    "1e+06"
+                ],
+                "type": "log",
+                "range": [
+                    231,
+                    844
+                ]
+            },
+            "type": "quantitative",
+            "axis": {
+                "title": "Noun Frequency"
+            }
+        }
+    },
+    "mark": "line",
+    "width": 994,
+    "chart_type": "LineGraph",
+    "height": 570
+}
