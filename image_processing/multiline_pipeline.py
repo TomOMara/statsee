@@ -54,8 +54,8 @@ class MultilinePipeline:
         """
         >>> pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('images/simple_demo_1.png', 'json/simple_demo_1.json'), parse_resolution=3)
         >>> pipeline.get_all_datasets_for_image_with_name('images/simple_demo_1.png')
-        1 coloured curves found.
         {'A': {'1': 4.8, '3': 4.8, '2': 4.8}}
+
         >>> pipeline.get_all_datasets_for_image_with_name(1)
         Traceback (most recent call last):
             ...
@@ -157,39 +157,42 @@ class MultilinePipeline:
             # then we have each graph to split_images array
             # repeat until n_lines is 0
         """
-        binary_image = preprocess_image(original_image)
-        # first we pre-process the image only removing lines that aren't thick i.e graph lines
-        cleaned_image = clean_image(original_image)
+        masks = []
+        coloured_ranges = self.get_colour_ranges_from_image(original_image)
 
-        images_of_curves_split_by_colour = []
+        if coloured_ranges == None:
+            return None
 
-        h, w, chn = original_image.shape
+        for coloured_range in coloured_ranges:
+            upper_range, lower_range = coloured_range
+            lower_range = np.asarray([i for i in lower_range])
+            upper_range = np.asarray([i for i in upper_range])
 
-        seeds = self.get_seeds_from_image(cleaned_image)
+            mask = cv2.inRange(original_image,
+                               lower_range,
+                               upper_range)
+            masks.append(mask)
 
-        if not seeds: return None
-
-        floodflags = 4
-        floodflags |= cv2.FLOODFILL_MASK_ONLY
-        floodflags |= (255 << 8)
-
-        # create a mask from each seed which is
-        for seed in seeds:
-            mask = np.zeros((h + 2, w + 2), np.uint8)
-            num, im, mask, rect = cv2.floodFill(cleaned_image, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
-
-            mask = remove_mask_border(mask=mask)
-            images_of_curves_split_by_colour.append(mask)
-
-        print "{0} coloured curves found.".format(len(images_of_curves_split_by_colour))
-        return images_of_curves_split_by_colour  # because its sitting in to arrays
-
+        return masks
 
     def graphs_split_by_curve_style(self, original_image):
         images_of_curves_split_by_style = []
 
         return images_of_curves_split_by_style
 
+    def get_colour_ranges_from_image(self, image):
+        """
+        Returns two arrays, upper and lower bound colour ranges for each colour found on a line
+        in an image
+
+        :param image:
+        :return: upper_range, lower_range where a range is [b g r] colour range
+        """
+        label_positions = get_averaged_x_label_anchors(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
+        cuts = get_coloured_cuts_for_image(image, label_positions)
+        colour_ranges = get_rgb_range_of_edges_in_cuts(cuts, label_positions)
+
+        return colour_ranges
 
     def get_seeds_from_image(self, image):
         """
@@ -378,7 +381,7 @@ if __name__ == '__main__':
     test_images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_three.png', 'simple_demo_4.png',
                   'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
                   'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
-    # test_images = ['double_demo_one.png']
+    # test_images = ['hard_demo_one.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
