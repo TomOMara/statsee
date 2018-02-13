@@ -57,6 +57,37 @@ def get_rgb_range_of_edges_in_cuts(cuts, label_positions):
 
     if not edge_coord_ranges_of_cut_with_most_edges:
         return None
+
+    for edge_height in edge_coord_ranges_of_cut_with_most_edges:
+        # rgb_ranges.append((label_positions[index_of_cut_with_most_edges], edge_height[0]))
+         rgb_bounds_for_current_edge = get_lower_and_upper_bound_for_edge_in_channels_with_index_using_cut(cuts[index_of_cut_with_most_edges],
+                                                                            edge_height)
+         rgb_ranges.append(rgb_bounds_for_current_edge)
+    return rgb_ranges
+
+def get_lower_and_upper_bound_for_edge_in_channels_with_index_using_cut(cut, edge_height_tuple):
+    assert(len(cut.shape)==2) # 2d cut (with rgb channels)
+
+    channel_b = column(cut, 0)
+    channel_g = column(cut, 1)
+    channel_r = column(cut, 2)
+
+    # minimum and maximum R values for this edge
+    edge_channel_b = [channel_b[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])]
+    edge_channel_g = [channel_g[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])]
+    edge_channel_r = [channel_r[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])]
+
+    u_b = max(edge_channel_b)
+    u_g = max(edge_channel_g)
+    u_r = max(edge_channel_r)
+
+    l_b = min(edge_channel_b)
+    l_g = min(edge_channel_g)
+    l_r = min(edge_channel_r)
+
+    bgr_upper, bgr_lower = (u_b, u_g, u_r), (l_b, l_g, l_r)
+
+    return bgr_upper, bgr_lower
 def column(two_d_array, i):
     return [row[i] for row in two_d_array]
 
