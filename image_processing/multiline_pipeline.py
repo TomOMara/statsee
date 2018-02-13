@@ -2,11 +2,13 @@ from helpers import *
 from preprocessing import *
 from edge_detection import *
 from json_parser import *
+from dash_connector import connect_dashes
 from graph_cutter import get_averaged_x_label_anchors
 import matplotlib.pyplot as plt
 import numpy as np
 import json
 from image_json_pair import ImageJsonPair
+import doctest
 
 plt.interactive(False)
 
@@ -22,8 +24,12 @@ class MultilinePipeline:
         self.image_json_pair = image_json_pair
 
     def run(self):
+
         if not self.image_json_pair:
             raise ValueError("No input files")
+
+        if self.should_run_tests:
+            doctest.testmod()
 
         image_name = self.image_json_pair.get_image_name()
         json_name = self.image_json_pair.get_json_name()
@@ -189,6 +195,7 @@ class MultilinePipeline:
         :return: upper_range, lower_range where a range is [b g r] colour range
         """
         label_positions = get_averaged_x_label_anchors(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
+        label_positions = [int(pos) for pos in expand_data_array(label_positions, 3)]
         cuts = get_coloured_cuts_for_image(image, label_positions)
         colour_ranges = get_rgb_range_of_edges_in_cuts(cuts, label_positions)
 
@@ -226,6 +233,9 @@ class MultilinePipeline:
         connected_components = measure.label(binary_image, background=0, neighbors=8)
         cc_matrix = np.zeros(binary_image.shape, dtype="uint8")
 
+        probable_dashes = []
+        min_pixel_count_for_dash = 10 # arbitrary choice here
+
         for component in np.unique(connected_components):
             # ignore black component
             if component == 0: continue
@@ -236,10 +246,21 @@ class MultilinePipeline:
             component_mask[connected_components == component] = 255  # inject our component into the mask
             component_pixels_count = cv2.countNonZero(component_mask)
 
+            # if we have a large number of roughly equally sized components
+            # then we are looking at a dashed line (probably)
+
+            # if component is not an artifact BUT too small to be full line
+            if component_pixels_count > min_pixel_count_for_dash and component_pixels_count < min_connected_pixels:
+                probable_dashes.append(component_mask)  # inject our component into the mask
+
             # if the number of pixels in the component is sufficiently
             # large, then add it to our matrix of large components
             if component_pixels_count > min_connected_pixels:
                 cc_matrix = cv2.add(cc_matrix, component_mask)
+
+        # if no large ccm but some dashes
+        if probable_dashes and not cc_matrix.any():
+            cc_matrix = connect_dashes(probable_dashes, cc_matrix)
 
         return cc_matrix
 
@@ -259,7 +280,7 @@ class MultilinePipeline:
 
     def image_is_descrete(self, image):
         """ This will axis type from REV and return true if discrete"""
-        return True # TODO
+        return True# TODO
 
 
     def get_continuous_datapoints_for_cc_matrix(self, cc_matrix):
@@ -371,8 +392,6 @@ class MultilinePipeline:
                 print("Error: " + e.message + " couldn't complete " + image)
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
 
     # if should_run_tests:
     #     clear_tmp_on_run()
@@ -381,7 +400,7 @@ if __name__ == '__main__':
     test_images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_three.png', 'simple_demo_4.png',
                   'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
                   'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
-    # test_images = ['hard_demo_one.png']
+    # test_images = ['hard_demo_three.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
@@ -389,5 +408,6 @@ if __name__ == '__main__':
                                  parse_resolution=2, should_run_tests=False)
 
     for image in test_images:
-        pipeline = MultilinePipeline(image_json_pair=ImageJsonPair(image, 'json/simple_demo_1.json'), parse_resolution=2, should_run_tests=False)
+        image_json_pair = ImageJsonPair(image, 'json/simple_demo_1.json')
+        pipeline = MultilinePipeline(image_json_pair=image_json_pair, parse_resolution=3, should_run_tests=True)
         pipeline.run()
