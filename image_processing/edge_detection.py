@@ -27,6 +27,36 @@ def get_coloured_cuts_for_image(image, positions_to_cut):
         cuts.append(cut)
 
     return cuts
+
+def get_rgb_range_of_edges_in_cuts(cuts, label_positions):
+    # make sure the cut we have is coloured
+    assert(len(cuts[0].shape) == 2)
+
+
+    rgb_ranges = []
+    array_of_edge_coord_ranges = []
+    for idx in range(len(cuts)):
+        # get list of all edge heights
+        while len(array_of_edge_coord_ranges) != len(cuts):
+            edge_coord_range = verticle_positions_of_coloured_edges_if_edges_present_in_cut(cuts[idx])
+            array_of_edge_coord_ranges.append(edge_coord_range)
+            idx+=1
+
+    most_edges_in_cut_found = 0
+    edge_coord_ranges_of_cut_with_most_edges = None
+    index_of_cut_with_most_edges = 0
+
+    # This section stores the cut with most edges in edge_coord_ranges_of_cut_with_most_edges
+    for edge_coord_range in array_of_edge_coord_ranges:
+
+        n_edges = len(edge_coord_range)
+        if n_edges > most_edges_in_cut_found:
+            most_edges_in_cut_found = n_edges
+            edge_coord_ranges_of_cut_with_most_edges = edge_coord_range
+            index_of_cut_with_most_edges = array_of_edge_coord_ranges.index(edge_coord_range)
+
+    if not edge_coord_ranges_of_cut_with_most_edges:
+        return None
 def column(two_d_array, i):
     return [row[i] for row in two_d_array]
 
