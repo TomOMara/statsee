@@ -27,6 +27,9 @@ def get_coloured_cuts_for_image(image, positions_to_cut):
         cuts.append(cut)
 
     return cuts
+def column(two_d_array, i):
+    return [row[i] for row in two_d_array]
+
 def get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions):
     """
     Get coordinates in pixels of wherever we see an edge in a cut
