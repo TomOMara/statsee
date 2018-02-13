@@ -12,6 +12,21 @@ def get_cuts_for_image(image, positions_to_cut):
 
     return cuts
 
+def get_coloured_cuts_for_image(image, positions_to_cut):
+    # gets a number of vertical cuts at position to cut
+    cuts = []
+
+    # for each group
+    for pos in positions_to_cut:
+        # take a cut
+        cut = image[:, pos]
+
+        # make sure the cut we have is coloured
+        assert (len(cut.shape) == 2)
+
+        cuts.append(cut)
+
+    return cuts
 def get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions):
     """
     Get coordinates in pixels of wherever we see an edge in a cut
