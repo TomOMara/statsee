@@ -4,9 +4,6 @@
   "title": "F Score Noun frequencies",
   "chart_type": "LineGraph",
   "mark": "line",
-  "series": [
-    { "name": "A", "value": [[1,1],[2,2],[3,3]] }
-  ],
   "encoding": {
     "x": {
       "field": "Noun Frequency",
