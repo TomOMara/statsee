@@ -33,5 +33,5 @@ def get_center_coords_from_probable_dashes(probable_dashes):
     return points
 
 
-def middle(self, list):
+def middle(list):
     return list[int(len(list) / 2)]

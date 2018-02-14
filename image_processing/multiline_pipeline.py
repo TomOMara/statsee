@@ -38,7 +38,7 @@ class MultilinePipeline:
             datasets = self.get_all_datasets_for_image_with_name('images/' + image_name)
 
             self.inject_line_data_into_file_with_name(json_name, datasets)
-            datasets = json.dumps(datasets, sort_keys=True)
+            datasets = json.dumps(datasets, sort_keys=True, indent=2, separators=(',', ': '))
             print(datasets)
         except ValueError as e:
             print("Error: " + e.message + " couldn't complete " + image_name)
@@ -53,7 +53,7 @@ class MultilinePipeline:
         json_data.update(dataset)
 
         with open('out/' + file_name, 'w+') as f:
-            json.dump(json_data, f, indent=4, separators=(',', ': '))
+            json.dump(json_data, f, indent=2, separators=(',', ':'))
 
 
     def get_all_datasets_for_image_with_name(self, image_name):
