@@ -29,42 +29,66 @@ def get_coloured_cuts_for_image(image, positions_to_cut):
     return cuts
 
 
-def get_rgb_range_of_edges_in_cuts(cuts, label_positions):
-    # make sure the cut we have is coloured
-    assert(len(cuts[0].shape) == 2)
+def get_array_of_edge_coord_ranges(cuts, is_coloured):
+    assert(is_coloured or not is_coloured)
 
-
-    rgb_ranges = []
     array_of_edge_coord_ranges = []
     for idx in range(len(cuts)):
         # get list of all edge heights
         while len(array_of_edge_coord_ranges) != len(cuts):
-            edge_coord_range = verticle_positions_of_coloured_edges_if_edges_present_in_cut(cuts[idx])
+            if is_coloured:
+                edge_coord_range = verticle_positions_of_coloured_edges_if_edges_present_in_cut(cuts[idx])
+            else:
+                edge_coord_range = verticle_positions_of_edges_if_edges_present_in_cut(cuts[idx])
+
             array_of_edge_coord_ranges.append(edge_coord_range)
             idx+=1
 
-    most_edges_in_cut_found = 0
-    edge_coord_ranges_of_cut_with_most_edges = None
+    return array_of_edge_coord_ranges
+
+def __(cuts, is_coloured)
+
+def get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges):
+    """
+    This section stores the cut with most edges in edge_coord_ranges_of_cut_with_most_edges
+    :param array_of_edge_coord_ranges: 
+    :return: edge_coord_range, index_of_cut_with_most_edges
+    """
     index_of_cut_with_most_edges = 0
+    edge_coord_ranges_of_cut_with_most_edges = None
+    most_edges_in_cut_found = 0
 
-    # This section stores the cut with most edges in edge_coord_ranges_of_cut_with_most_edges
     for edge_coord_range in array_of_edge_coord_ranges:
-
         n_edges = len(edge_coord_range)
+
         if n_edges > most_edges_in_cut_found:
             most_edges_in_cut_found = n_edges
             edge_coord_ranges_of_cut_with_most_edges = edge_coord_range
             index_of_cut_with_most_edges = array_of_edge_coord_ranges.index(edge_coord_range)
 
+    return edge_coord_ranges_of_cut_with_most_edges, index_of_cut_with_most_edges
+
+
+def get_rgb_range_of_edges_in_cuts(cuts, label_positions):
+    # make sure the cut we have is coloured
+    assert(len(cuts[0].shape) == 2)
+
+    rgb_ranges = []
+    array_of_edge_coord_ranges = get_array_of_edge_coord_ranges(cuts, is_coloured=True)
+    edge_coord_ranges_of_cut_with_most_edges, index_of_cut_with_most_edges = get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges)
+
     if not edge_coord_ranges_of_cut_with_most_edges:
         return None
 
     for edge_height in edge_coord_ranges_of_cut_with_most_edges:
-        # rgb_ranges.append((label_positions[index_of_cut_with_most_edges], edge_height[0]))
-         rgb_bounds_for_current_edge = get_lower_and_upper_bound_for_edge_in_channels_with_index_using_cut(cuts[index_of_cut_with_most_edges],
+        rgb_bounds_for_current_edge = get_lower_and_upper_bound_for_edge_in_channels_with_index_using_cut(cuts[index_of_cut_with_most_edges],
                                                                             edge_height)
-         rgb_ranges.append(rgb_bounds_for_current_edge)
-    return rgb_ranges
+        rgb_ranges.append(rgb_bounds_for_current_edge)
+
+    number_of_curves = len(edge_coord_ranges_of_cut_with_most_edges)
+
+    return rgb_ranges, number_of_curves
+
 
 def get_lower_and_upper_bound_for_edge_in_channels_with_index_using_cut(cut, edge_height_tuple):
     assert(len(cut.shape)==2) # 2d cut (with rgb channels)
@@ -103,13 +127,7 @@ def get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions):
     """
     pixel_coords = []
 
-    array_of_edge_heights = []
-    for idx in range(len(cuts)):
-        # get list of all edge heights
-        while len(array_of_edge_heights) != len(cuts):
-            edge_heights = verticle_positions_of_edges_if_edges_present_in_cut(cuts[idx])
-            array_of_edge_heights.append(edge_heights)
-            idx+=1
+    array_of_edge_heights = get_array_of_edge_coord_ranges(cuts, is_coloured=False)
 
     most_edges_in_cut_found = 0
     cut_with_most_edges = None
