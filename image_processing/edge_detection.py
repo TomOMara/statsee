@@ -46,7 +46,6 @@ def get_array_of_edge_coord_ranges(cuts, is_coloured):
 
     return array_of_edge_coord_ranges
 
-def __(cuts, is_coloured)
 
 def get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges):
     """
@@ -96,13 +95,12 @@ def get_rgb_range_of_edges_in_cuts(cuts, label_positions):
                                                                             edge_height)
         rgb_ranges.append(rgb_bounds_for_current_edge)
 
-    number_of_curves = len(edge_coord_ranges_of_cut_with_most_edges)
-
-    return rgb_ranges, number_of_curves
+    return rgb_ranges
 
 
 def get_lower_and_upper_bound_for_edge_in_channels_with_index_using_cut(cut, edge_height_tuple):
-    assert(len(cut.shape)==2) # 2d cut (with rgb channels)
+    # 2d cut (with rgb channels)
+    assert(len(cut.shape) == 2)
 
     channel_b = column(cut, 0)
     channel_g = column(cut, 1)
@@ -197,11 +195,11 @@ def verticle_positions_of_edges_if_edges_present_in_cut(cut):
 
     idx = 0
     ranges = []
-    while idx != len(cut):
+    while idx < len(cut):
         if current_is_edge(cut[idx]):
             range = get_index_range_of_current_edge(cut, idx)
             ranges.append(range)
-            idx = range[1]  # end is second part of tuple
+            idx = range[1]+1  # end is second part of tuple
         else:
             idx += 1
 
@@ -234,4 +232,4 @@ def get_index_range_of_current_edge(cut, start):
     while current_is_edge(cut[end]):
         end += 1
 
-    return (start, end)
+    return (start, end-1)
