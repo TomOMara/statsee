@@ -60,7 +60,7 @@ class MultilinePipeline:
         """
         >>> pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('images/simple_demo_1.png', 'json/simple_demo_1.json'), parse_resolution=3)
         >>> pipeline.get_all_datasets_for_image_with_name('images/simple_demo_1.png')
-        {'A': {'1': 4.8, '3': 4.8, '2': 4.8}}
+        {'A': {'1': 4.82, '3': 4.82, '2': 4.82}}
 
         >>> pipeline.get_all_datasets_for_image_with_name(1)
         Traceback (most recent call last):
@@ -150,10 +150,10 @@ class MultilinePipeline:
     def graphs_split_by_curve_colour(self, original_image):
         """
         for coloured graphs! ->
-            # first we pre-process the image                                                                            DONE_A
-                # only removing lines that aren't thick i.e graph lines                                                 DONE_B
-            # then we get the amount of separate blobs from several cuts along the x axis and take the highest number   DONE_B
-            # ( to reduce chance of gap between dashes )                                                                DONE_B
+            # first we pre-process the image
+                # only removing lines that aren't thick i.e graph lines
+            # then we get the amount of separate blobs from several cuts along the x axis and take the highest number
+            # ( to reduce chance of gap between dashes )
             # n_lines = 3 for instance
             # then we get the cut where n_lines was highest
             # then we get the central! pixel in each blob
