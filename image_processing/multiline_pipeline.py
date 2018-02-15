@@ -192,6 +192,33 @@ class MultilinePipeline:
 
         return masks
 
+    def handle_same_colour_lines_in_mask(self, in_mask):
+        # first we pre-process the image only removing lines that aren't thick i.e graph lines
+        split_masks = []
+        h, w = in_mask.shape
+
+        in_mask = dilate_image(in_mask)
+
+        seeds = self.get_seeds_from_image(in_mask)
+
+        if not seeds:
+            return None
+
+        floodflags = 8
+        floodflags |= cv2.FLOODFILL_MASK_ONLY
+        floodflags |= (255 << 8)
+
+        # create a mask from each seed which is
+        for seed in seeds:
+            mask = np.zeros((h + 2, w + 2), np.uint8)
+            num, im, mask, rect = cv2.floodFill(in_mask, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
+
+            mask = remove_mask_border(mask=mask)
+
+            split_masks.append(mask)
+
+        return split_masks
+
     def graphs_split_by_curve_style(self, original_image):
         images_of_curves_split_by_style = []
 
