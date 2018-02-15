@@ -280,7 +280,7 @@ class MultilinePipeline:
         cc_matrix = np.zeros(binary_image.shape, dtype="uint8")
 
         probable_dashes = []
-        min_pixel_count_for_dash = 10 # arbitrary choice here
+        min_pixel_count_for_dash = 5 # arbitrary choice here
 
         for component in np.unique(connected_components):
             # ignore black component
