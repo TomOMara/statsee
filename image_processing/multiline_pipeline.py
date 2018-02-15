@@ -239,6 +239,14 @@ class MultilinePipeline:
 
         return colour_ranges
 
+    def get_number_of_curves_in_binary_image(self, binary_image):
+        label_positions = get_averaged_x_label_anchors(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
+        label_positions = [int(pos) for pos in expand_data_array(label_positions, 2)]
+        cuts = get_cuts_for_image(binary_image, label_positions)
+        n_curves = get_number_of_curves_in_cuts(cuts, label_positions)
+
+        return n_curves
+
     def get_seeds_from_image(self, image):
         """
          This returns an array of tuples containing coordinates where we are certain there is a unique line.
