@@ -177,7 +177,18 @@ class MultilinePipeline:
             mask = cv2.inRange(original_image,
                                lower_range,
                                upper_range)
-            masks.append(mask)
+
+            # check here that there aren't more than two lines in this mask.
+            # if there are then need to split up old fashion way
+            n_curves_in_binary_mask = self.get_number_of_curves_in_binary_image(mask)
+
+            if n_curves_in_binary_mask > 1:
+                split_masks_with_same_colour_curves = self.handle_same_colour_lines_in_mask(mask)
+                for split_mask in split_masks_with_same_colour_curves:
+                    masks.append(split_mask)
+                return masks
+            else:
+                masks.append(mask)
 
         return masks
 
