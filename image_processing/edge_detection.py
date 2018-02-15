@@ -69,6 +69,17 @@ def get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ra
     return edge_coord_ranges_of_cut_with_most_edges, index_of_cut_with_most_edges
 
 
+def get_number_of_curves_in_cuts(cuts, label_positions):
+
+    array_of_edge_coord_ranges = get_array_of_edge_coord_ranges(cuts, is_coloured=False)
+    edge_coord_ranges_of_cut_with_most_edges, index_of_cut_with_most_edges = get_edge_coord_range_and_index_of_cut_with_most_edges(
+        array_of_edge_coord_ranges)
+
+    number_of_curves = len(edge_coord_ranges_of_cut_with_most_edges or [])
+
+    return number_of_curves
+
+
 def get_rgb_range_of_edges_in_cuts(cuts, label_positions):
     # make sure the cut we have is coloured
     assert(len(cuts[0].shape) == 2)
