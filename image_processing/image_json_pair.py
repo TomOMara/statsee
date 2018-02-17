@@ -1,4 +1,6 @@
 from graph_cutter import *
+import cv2
+from helpers import expand_data_array
 
 class ImageJsonPair:
 
@@ -8,6 +10,9 @@ class ImageJsonPair:
 
     def get_image_name(self):
         return self.image_name
+
+    def get_image(self):
+        return cv2.imread(self.image_name)
 
     def get_json_name(self):
         return self.json_name
@@ -37,6 +42,12 @@ class ImageJsonPair:
         # TODO
         return 9
 
+    def is_continuous(self):
+        return False
+
+    def is_discrete(self):
+        return True
+
     def get_graph_labels_and_size(self):
         return self.get_x_axis_labels(), \
                self.get_x_axis_width(), \
@@ -44,5 +55,6 @@ class ImageJsonPair:
                self.get_y_axis_val_max()
 
     def get_label_positions(self):
-        return get_averaged_x_label_anchors(x_labels=self.get_x_axis_labels(),
+        label_positions = get_averaged_x_label_anchors(x_labels=self.get_x_axis_labels(),
                                             x_width=self.get_x_axis_width())
+        return [int(pos) for pos in expand_data_array(label_positions, 2)]
