@@ -107,9 +107,9 @@ def get_lower_and_upper_bound_for_edge_in_channels_with_index_using_cut(cut, edg
     channel_r = column(cut, 2)
 
     # minimum and maximum R values for this edge
-    edge_channel_b = [channel_b[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])]
-    edge_channel_g = [channel_g[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])]
-    edge_channel_r = [channel_r[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])]
+    edge_channel_b = [channel_b[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])] or [channel_b[edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])] or [channel_g[edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])] or [channel_r[edge_height_tuple[0]]]
 
     u_b = max(edge_channel_b)
     u_g = max(edge_channel_g)
