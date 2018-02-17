@@ -138,7 +138,8 @@ if __name__ == '__main__':
                    'hard_demo_five.png',
                    'e_hard_one.png', 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
     # test_images = ['e_hard_one.png']# 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
-    # test_images = ['hard_demo_five.png']
+    # test_images = ['e_hard_four.png']
+    # test_images = ['black_two.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
@@ -146,6 +147,6 @@ if __name__ == '__main__':
                                  parse_resolution=2, should_run_tests=False)
 
     for image in test_images:
-        image_json_pair = ImageJsonPair(image, 'json/simple_demo_1.json')
-        pipeline = MultilinePipeline(image_json_pair=image_json_pair, parse_resolution=2, should_run_tests=True)
+        image_json_pair = ImageJsonPair('images/' + image, 'json/simple_demo_1.json')
+        pipeline = MultilinePipeline(image_json_pair=image_json_pair, parse_resolution=3, should_run_tests=False)
         pipeline.run()
