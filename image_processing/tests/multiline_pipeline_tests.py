@@ -13,12 +13,131 @@ def pipeline(input_image):
 def image(image_name):
     return ImageJsonPair('../images/' + image_name, '../out/json/simple_demo_1.json')
 
+@pytest.fixture
+def number_of_curves_in(dataset):
+    return len(dataset)
+
+@pytest.fixture
+def trend_of(curve, image):
+    point_values = []
+    result = ""
+    for point_name, point_value in sorted(curve.iteritems()):
+        print point_value
+        point_values.append(point_value)
+
+    print(point_values)
+    last_value = point_values[-1]
+    first_value = point_values[0]
+
+    if last_value < first_value:
+        result += "negative"
+
+    if last_value > first_value:
+        result += "positive"
+
+    if each_value_is_the_same(point_values):
+        result += "horizontal"
+
+    if each_delta_is_the_same(point_values, acceptable_error_rate(image)):
+        result += " constant"
+
+    if not each_delta_is_the_same(point_values):
+        result += " curve"
+
+    return result
+
+@pytest.fixture
+def acceptable_error_rate(image):
+    return float(image.get_y_axis_val_max()) * 0.05
+
+
+@pytest.fixture
+def each_value_is_the_same(arr_of_values):
+    return len(set(arr_of_values)) == 1
+
+def deltas(arr):
+    return [arr[idx + 1] - arr[idx] for idx in range(len(arr) - 1)]
+
+
+def each_delta_is_the_same(arr_of_values, acceptable_error_rate):
+    print deltas(arr_of_values)
+    delts = deltas(arr_of_values)
+    return all(delts[0] - acceptable_error_rate <= x <= delts[0] + acceptable_error_rate for x in delts)
+
+
 
 def test_simple_demo_one():
     input = image('simple_demo_1.png')
     pipe = pipeline(input)
     pipe.run()
     assert pipe.datasets == {'A': {'1': 4.82, '2': 4.82, '3': 4.82}}
+    assert number_of_curves_in(pipe.datasets) == 1
+    curve = pipe.datasets['A']
+    assert trend_of(curve) == "horizontal constant"
+
+def test_simple_demo_two():
+    input = image('simple_demo_2.png')
+    pipe = pipeline(input)
+    pipe.run()
+    assert pipe.datasets == {'A': {'1': 2.36, '2': 4.2, '3': 6.07}}
+    assert number_of_curves_in(pipe.datasets) == 1
+    curve = pipe.datasets['A']
+    assert trend_of(curve) == "positive constant"
+
+
+def test_simple_demo_three():
+    input = image('simple_demo_3.png')
+    pipe = pipeline(input)
+    pipe.run()
+    assert pipe.datasets == {'A': {'1': 7.36, '2': 5.49, '3': 3.65}}
+    assert number_of_curves_in(pipe.datasets) == 1
+    curve = pipe.datasets['A']
+    assert trend_of(curve) == "negative constant"
+
+
+def test_simple_demo_four():
+    input = image('simple_demo_4.png')
+    pipe = pipeline(input)
+    pipe.run()
+    assert pipe.datasets == {'A': {'1': 4.33, '2': 4.33, '3': 4.33}}
+    assert number_of_curves_in(pipe.datasets) == 1
+    curve = pipe.datasets['A']
+    assert trend_of(curve) == "horizontal constant"
+
+def test_double_demo_one():
+    input = image('double_demo_one.png')
+    pipe = pipeline(input)
+    pipe.run()
+    assert number_of_curves_in(pipe.datasets) == 2
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    assert trend_of(curve_A) == "horizontal constant"
+    assert trend_of(curve_B) == "horizontal constant"
+    assert curve_A != curve_B
+
+
+def test_double_demo_two():
+    input = image('double_demo_two.png')
+    pipe = pipeline(input)
+    pipe.run()
+    assert number_of_curves_in(pipe.datasets) == 2
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    assert trend_of(curve_A) == "positive constant"
+    assert trend_of(curve_B) == "positive constant"
+    assert curve_A != curve_B
+
+
+def test_double_demo_one():
+    input = image('double_demo_three.png')
+    pipe = pipeline(input)
+    pipe.run()
+    assert number_of_curves_in(pipe.datasets) == 2
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    assert trend_of(curve_A) == "negative constant"
+    assert trend_of(curve_B) == "negative constant"
+    assert curve_A != curve_B
 
 
 
