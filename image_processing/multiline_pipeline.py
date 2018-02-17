@@ -14,7 +14,7 @@ class MultilinePipeline:
         self.should_run_tests = should_run_tests
         self.parse_resolution = parse_resolution
         self.image_json_pair = image_json_pair
-
+        self.datasets = None
     def run(self):
 
         if not self.image_json_pair:
@@ -24,17 +24,22 @@ class MultilinePipeline:
             doctest.testmod()
 
         image_name = self.image_json_pair.get_image_name()
-        json_name = self.image_json_pair.get_json_name()
 
         try:
-            datasets = self.get_all_datasets_for_image_with_name('images/' + image_name)
-
-            inject_line_data_into_file_with_name(json_name, datasets)
-            datasets = json.dumps(datasets, sort_keys=True, indent=2, separators=(',', ': '))
-            print(image_name)
-            print(datasets)
+            self.datasets = self.get_all_datasets_for_image_with_name(image_name)
+            self.print_output()
         except ValueError as e:
             print("Error: " + e.message + " couldn't complete " + image_name)
+
+    def save(self):
+        json_name = self.image_json_pair.get_json_name()
+        inject_line_data_into_file_with_name(json_name, self.datasets)
+
+    def print_output(self):
+        if self.datasets is None:
+            raise Exception("No dataset available")
+        output = json.dumps(self.datasets, sort_keys=True, indent=2, separators=(',', ': '))
+        print output
 
     def get_all_datasets_for_image_with_name(self, image_name):
         """
