@@ -496,3 +496,12 @@ def get_discrete_datapoints_for_cc_matrix(cc_matrix, image):
     # y coords now unadjusted
     return [x_y_coord_list]
 
+
+def pry():
+    """
+    https://gist.github.com/obfusk/208597ccc64bf9b436ed
+    Stop execution with a terminal instance - just like pry in ruby!
+    :return:
+    """
+    import code
+    code.interact(local=dict(globals(), **locals()))
