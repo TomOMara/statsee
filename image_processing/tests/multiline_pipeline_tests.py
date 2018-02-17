@@ -1,23 +1,24 @@
 import pytest
 from ..multiline_pipeline import *
+
 """ 
     Test the output for a one line image is of the format expected 
 """
+@pytest.fixture
+def pipeline(input_image):
+    pipeline = MultilinePipeline(input_image, parse_resolution=2, should_run_tests=False)
+    return pipeline
 
-image_path = '../images/'
+@pytest.fixture
+def image(image_name):
+    return ImageJsonPair('../images/' + image_name, '../out/json/simple_demo_1.json')
 
-def get_image_with_name(image_name):
 
-    return image_path + image_name
-
-def test_one_line_image_format():
-    image = get_image_with_name('simple_demo_1.png')
-    assert(image is not None)
-
-    datasets = get_all_datasets_for_image_with_name(image)
-    print 'datasets: ' , datasets
-    assert(len(datasets) == 1) #
-
+def test_simple_demo_one():
+    input = image('simple_demo_1.png')
+    pipe = pipeline(input)
+    pipe.run()
+    assert pipe.datasets == {'A': {'1': 4.82, '2': 4.82, '3': 4.82}}
 
 
 
