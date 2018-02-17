@@ -156,7 +156,7 @@ if __name__ == '__main__':
                    'e_hard_one.png', 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
     # test_images = ['e_hard_one.png']# 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
     # test_images = ['e_hard_four.png']
-    test_images = ['double_demo_one.png']
+    test_images = ['hard_demo_one.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
