@@ -206,9 +206,6 @@ def get_x_label_positions(x_labels, x_width):
     return label_positions
 
 
-def get_graph_labels_and_size():
-    return get_x_axis_labels(), get_x_axis_width(), get_y_axis_pixel_height(), get_y_axis_val_max()
-
 
 def image_is_descrete(image):
     """ This will axis type from REV and return true if discrete"""
@@ -268,7 +265,7 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
     return cc_matrix
 
 
-def get_seeds_from_image(image):
+def get_seeds_from_image(image, label_positions):
     """
      This returns an array of tuples containing coordinates where we are certain there is a unique line.
 
@@ -276,7 +273,6 @@ def get_seeds_from_image(image):
     :return: coordinates of lines in seeds
     """
 
-    label_positions = get_averaged_x_label_anchors(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
     cuts = get_cuts_for_image(image, label_positions)
 
     # get coordinate & append to seeds
@@ -285,8 +281,8 @@ def get_seeds_from_image(image):
     return seeds
 
 
-def get_number_of_curves_in_binary_image(binary_image):
-    label_positions = get_averaged_x_label_anchors(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
+def get_number_of_curves_in_binary_image(binary_image, image_json_pair):
+    label_positions = get_averaged_x_label_anchors(x_labels=image_json_pair.get_x_axis_labels(), x_width=image_json_pair.get_x_axis_width())
     label_positions = [int(pos) for pos in expand_data_array(label_positions, 2)]
     cuts = get_cuts_for_image(binary_image, label_positions)
     n_curves = get_number_of_curves_in_cuts(cuts)
@@ -294,7 +290,7 @@ def get_number_of_curves_in_binary_image(binary_image):
     return n_curves
 
 
-def get_colour_ranges_from_image(image):
+def get_colour_ranges_from_image(image, image_json_pair):
     """
     Returns two arrays, upper and lower bound colour ranges for each colour found on a line
     in an image
@@ -302,7 +298,7 @@ def get_colour_ranges_from_image(image):
     :param image:
     :return: upper_range, lower_range where a range is [b g r] colour range
     """
-    label_positions = get_averaged_x_label_anchors(x_labels=get_x_axis_labels(), x_width=get_x_axis_width())
+    label_positions = get_averaged_x_label_anchors(x_labels=image_json_pair.get_x_axis_labels(), x_width=image_json_pair.get_x_axis_width())
     label_positions = [int(pos) for pos in expand_data_array(label_positions, 3)]
     cuts = get_coloured_cuts_for_image(image, label_positions)
     colour_ranges = get_rgb_range_of_edges_in_cuts(cuts)
@@ -322,7 +318,7 @@ def handle_same_colour_lines_in_mask(in_mask):
     h, w = in_mask.shape
 
     in_mask = dilate_image(in_mask)
-    seeds = get_seeds_from_image(in_mask)
+    seeds = get_seeds_from_image(in_mask, )
 
     if not seeds:
         return None
@@ -342,7 +338,7 @@ def handle_same_colour_lines_in_mask(in_mask):
     return split_masks
 
 
-def graphs_split_by_curve_colour(original_image):
+def graphs_split_by_curve_colour(original_image, image_json_pair):
     """
     for coloured graphs! ->
         # first we pre-process the image
@@ -359,7 +355,7 @@ def graphs_split_by_curve_colour(original_image):
         # repeat until n_lines is 0
     """
     masks = []
-    coloured_ranges = get_colour_ranges_from_image(original_image)
+    coloured_ranges = get_colour_ranges_from_image(original_image, image_json_pair=image_json_pair)
 
     if coloured_ranges == None:
         return None
@@ -372,7 +368,7 @@ def graphs_split_by_curve_colour(original_image):
         mask = cv2.inRange(original_image, lower_range, upper_range)
         # check here that there aren't more than two lines in this mask.
         # if there are then need to split up old fashion way
-        n_curves_in_binary_mask = get_number_of_curves_in_binary_image(mask)
+        n_curves_in_binary_mask = get_number_of_curves_in_binary_image(mask, image_json_pair=image_json_pair)
 
         if n_curves_in_binary_mask > 1:
             split_masks_with_same_colour_curves = handle_same_colour_lines_in_mask(mask)
@@ -385,7 +381,7 @@ def graphs_split_by_curve_colour(original_image):
     return masks
 
 
-def original_image_split_by_curves(original_image):
+def original_image_split_by_curves(original_image, image_json_pair):
     """
     Produces array of images split by curves, i.e if image had N curves,
     this should produce array of N images, one with each curve on it.
@@ -396,7 +392,7 @@ def original_image_split_by_curves(original_image):
     # split_images.append(graphs_split_by_curve_colour(original_image) +
     #                      graphs_split_by_curve_style(original_image))
 
-    images_split_by_curve_colour = graphs_split_by_curve_colour(original_image)
+    images_split_by_curve_colour = graphs_split_by_curve_colour(original_image, image_json_pair=image_json_pair)
 
     if not images_split_by_curve_colour: return None
 
@@ -417,11 +413,11 @@ def original_image_split_by_curves(original_image):
     return split_images
 
 
-def all_connected_component_matrices(original_image):
+def all_connected_component_matrices(original_image, image_json_pair):
     """ returns array of all connected component matrices """
     ccms = []
 
-    split_images = original_image_split_by_curves(original_image)
+    split_images = original_image_split_by_curves(original_image, image_json_pair=image_json_pair)
 
     if not split_images: return None
 
@@ -475,21 +471,6 @@ def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
     return cuts
 
 
-def get_discrete_datapoints_for_cc_matrix(cc_matrix, image):
-    """ Returns x, y datapoints for component  in JSON form
-    :param cc_matrix:
-    :param image:
-    :return:
-    """
-    x_labels, x_width, y_pixel_height, y_val_max = get_graph_labels_and_size()
-
-    label_positions = get_averaged_x_label_anchors(x_width, x_labels)
-    cuts = get_x_axis_cuts_from_ccm(label_positions, cc_matrix)
-    y_coords = get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height)
-    x_y_coord_list = get_x_y_coord_list(x_labels, y_coords)
-
-    # y coords now unadjusted
-    return [x_y_coord_list]
 
 
 def pry():

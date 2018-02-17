@@ -65,7 +65,7 @@ class MultilinePipeline:
         datasets = []
         image = cv2.imread(image_name)
 
-        all_ccms = all_connected_component_matrices(image)
+        all_ccms = all_connected_component_matrices(image, self.image_json_pair)
 
         if not all_ccms:
             raise Exception("couldn't get any connected components for " + image_name)
@@ -81,21 +81,38 @@ class MultilinePipeline:
         dict = format_dataset_to_dictionary(datasets)
         return dict
 
+
     def get_datapoints_from_ccm(self, image, ccm):
         """ returns data points for any ccm """
         if image_is_continuous(image):
             return self.get_continuous_datapoints_for_cc_matrix(ccm)
         if image_is_descrete(image):
-            return get_discrete_datapoints_for_cc_matrix(ccm, image)
+            return self.get_discrete_datapoints_for_cc_matrix(ccm, image)
 
     def get_continuous_datapoints_for_cc_matrix(self, cc_matrix):
         """ Returns x, y datapoints for component  in JSON form """
-        x_labels, x_width, y_pixel_height, y_val_max = get_graph_labels_and_size()
+        x_labels, x_width, y_pixel_height, y_val_max = self.image_json_pair.get_graph_labels_and_size()
 
         label_positions = get_averaged_x_label_anchors(x_width, x_labels)
         cuts = self.get_more_x_axis_cuts_from_ccm(label_positions, cc_matrix)
         y_coords = get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height)
         x_labels = expand_data_array(x_labels, self.parse_resolution)
+        x_y_coord_list = get_x_y_coord_list(x_labels, y_coords)
+
+        # y coords now unadjusted
+        return [x_y_coord_list]
+
+    def get_discrete_datapoints_for_cc_matrix(self, cc_matrix, image):
+        """ Returns x, y datapoints for component  in JSON form
+        :param cc_matrix:
+        :param image:
+        :return:
+        """
+        x_labels, x_width, y_pixel_height, y_val_max = self.image_json_pair.get_graph_labels_and_size()
+
+        label_positions = get_averaged_x_label_anchors(x_width, x_labels)
+        cuts = get_x_axis_cuts_from_ccm(label_positions, cc_matrix)
+        y_coords = get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height)
         x_y_coord_list = get_x_y_coord_list(x_labels, y_coords)
 
         # y coords now unadjusted
@@ -132,14 +149,14 @@ if __name__ == '__main__':
     #     clear_tmp_on_run()
     #     tests()
 
-    test_images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_three.png', 'simple_demo_4.png',
+    test_images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_3.png', 'simple_demo_4.png',
                    'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
                    'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png',
                    'hard_demo_five.png',
                    'e_hard_one.png', 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
     # test_images = ['e_hard_one.png']# 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
     # test_images = ['e_hard_four.png']
-    # test_images = ['black_two.png']
+    test_images = ['double_demo_one.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
@@ -150,3 +167,4 @@ if __name__ == '__main__':
         image_json_pair = ImageJsonPair('images/' + image, 'json/simple_demo_1.json')
         pipeline = MultilinePipeline(image_json_pair=image_json_pair, parse_resolution=3, should_run_tests=False)
         pipeline.run()
+        pipeline.datasets
