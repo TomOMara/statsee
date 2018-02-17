@@ -135,7 +135,7 @@ def format_dataset_to_dictionary(datasets):
         raise ValueError("curve coordinate should be a tuple")
 
     dataset_dict = {}
-    possible_curve_keys = ['A', 'B', 'C']
+    possible_curve_keys = ['A', 'B', 'C', 'D', 'E', 'F']
 
     for curve in datasets:
         curve_dict = dict()
@@ -322,7 +322,6 @@ def handle_same_colour_lines_in_mask(in_mask):
     h, w = in_mask.shape
 
     in_mask = dilate_image(in_mask)
-
     seeds = get_seeds_from_image(in_mask)
 
     if not seeds:
@@ -340,7 +339,6 @@ def handle_same_colour_lines_in_mask(in_mask):
         mask = remove_mask_border(mask=mask)
 
         split_masks.append(mask)
-
     return split_masks
 
 
@@ -371,10 +369,7 @@ def graphs_split_by_curve_colour(original_image):
         lower_range = np.asarray([i for i in lower_range])
         upper_range = np.asarray([i for i in upper_range])
 
-        mask = cv2.inRange(original_image,
-                           lower_range,
-                           upper_range)
-
+        mask = cv2.inRange(original_image, lower_range, upper_range)
         # check here that there aren't more than two lines in this mask.
         # if there are then need to split up old fashion way
         n_curves_in_binary_mask = get_number_of_curves_in_binary_image(mask)
@@ -383,7 +378,7 @@ def graphs_split_by_curve_colour(original_image):
             split_masks_with_same_colour_curves = handle_same_colour_lines_in_mask(mask)
             for split_mask in split_masks_with_same_colour_curves:
                 masks.append(split_mask)
-            return masks
+            # return masks
         else:
             masks.append(mask)
 
