@@ -43,6 +43,7 @@ def get_averaged_x_label_anchors(x_width, x_labels):
     except ValueError as e:
         return get_adjusted_x_label_anchors(x_width, x_labels)
 
+
 def get_adjusted_x_label_anchors(x_width, x_labels):
     """
     Average the position of each x label presuming it could be either centered text or uncentered, taking the middle so as to be

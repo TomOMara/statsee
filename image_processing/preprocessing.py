@@ -4,6 +4,7 @@ from helpers import *
 
 DEBUG = False
 
+
 def preprocess_image(image):
     """ Preprocess image, returned in binary"""
 
@@ -13,6 +14,7 @@ def preprocess_image(image):
     binary_image = binarize_image(gray_image)
 
     return binary_image
+
 
 def grayscale_image(image):
     """
@@ -25,6 +27,7 @@ def grayscale_image(image):
         cv2.imwrite("tmp/tmp_grayscale.png", gray_image)
 
     return gray_image
+
 
 def binarize_image(gray_image, threshold=255):
     """
@@ -45,7 +48,6 @@ def binarize_image(gray_image, threshold=255):
         cv2.imwrite("tmp/tmp_binarize.png", gray_image)
 
     return binary_image
-
 
 
 def remove_mask_border(mask):
@@ -76,17 +78,20 @@ def remove_grid_lines(image):
     gray_image = grayscale_image(image)
     binary_image_without_grid = binarize_image(gray_image, 20)
 
-    if DEBUG:
-        show_image(image)
-        show_image(gray_image)
-        show_image(binary_image_without_grid)
-
     return binary_image_without_grid
+
 
 def blur_image(image):
     blur_factor = 9
     kernel_large = np.ones((blur_factor, blur_factor), np.float32) / blur_factor ** 2
     return cv2.filter2D(image, -1, kernel_large)
+
+
+def dilate_image(img):
+    kernel = np.ones((9, 9), np.uint8)
+    img_dilation = cv2.dilate(img, kernel, iterations=1)
+    return img_dilation
+
 
 def crop_to_plot_area(image):
     # TODO: take plot area from REV JSON and remove anything else
