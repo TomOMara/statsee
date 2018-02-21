@@ -95,7 +95,61 @@ def get_rgb_range_of_edges_in_cuts(cuts):
                                                                                       edge_height)
         rgb_ranges.append(rgb_bounds_for_current_edge)
 
-    return rgb_ranges
+    ### start work here
+
+    all_coord_ranges_found_with_most_edges, respective_indexes = get_all_coord_ranges_with_most_edges(array_of_edge_coord_ranges)
+    all_rgb_ranges = []
+
+    for coord_ranges in all_coord_ranges_found_with_most_edges:
+        cut_idx = respective_indexes.pop(0)
+        rgb_ranges_for_cut = []
+        for edge in coord_ranges:
+            rgb_bounds_for_current_edge = get_lower_and_upper_bound_colour_range_for_edge(cuts[cut_idx], edge)
+            rgb_ranges_for_cut.append(rgb_bounds_for_current_edge)
+        all_rgb_ranges.append(rgb_ranges_for_cut)
+
+    # all_rgb_ranges should now contain colour ranges for the edges.
+    # now for each item in all_rgb_ranges, we just want the most commonly occuring item
+    from math import ceil
+    found_mode = False
+    mode_of_range = None
+    over_half = int(ceil(len(all_rgb_ranges) / 2.0))
+    idx = 0
+    while not found_mode:
+        if idx == len(all_rgb_ranges) - 1:
+            return rgb_ranges
+        if all_rgb_ranges.count(all_rgb_ranges[idx]) >= over_half:
+            found_mode = True
+            mode_of_range = all_rgb_ranges[idx]
+        idx += 1
+
+    if mode_of_range == None:
+        raise Exception("no mode colour range for cuts")
+
+    else:
+        return mode_of_range
+        ## ## end work here
+
+    # return rgb_ranges
+
+def get_all_coord_ranges_with_most_edges(array_of_edge_coord_ranges):
+    """
+    this discards any coord range where we dont have the max possible edges
+    :param array_of_edge_coord_ranges:
+    :return: coord_ranges
+    """
+    max_possible_edges = max(set([len(x) for x in array_of_edge_coord_ranges]))
+    coord_ranges = []
+    coord_range_indexes = []
+    for edge_coord_range in array_of_edge_coord_ranges:
+        n_edges = len(edge_coord_range)
+
+        if n_edges == max_possible_edges:
+            coord_ranges.append(edge_coord_range)
+
+    indexes = [i for i, x in enumerate(array_of_edge_coord_ranges) if len(x) == max_possible_edges]
+
+    return coord_ranges, indexes
 
 
 def get_lower_and_upper_bound_colour_range_for_edge(cut, edge_height_tuple):
