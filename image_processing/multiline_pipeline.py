@@ -36,30 +36,24 @@ class MultilinePipeline:
     def print_output(self):
         if self.datasets is None:
             raise Exception("No dataset available")
+
         output = json.dumps(self.datasets, sort_keys=True, indent=2, separators=(',', ': '))
-        print output
+        print self.image_json_pair.get_image_name(), output
 
     def get_all_datasets_for_image_in_pair(self):
         """
         >>> pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('images/simple_demo_1.png', 'json/simple_demo_1.json'), parse_resolution=3)
         >>> pipeline.get_all_datasets_for_image_in_pair()
-        {'A': {'1': 4.82, '3': 4.82, '2': 4.82}}
+        {'A': {'1': 4.82, '3': 4.82, '2': 4.82, '4': 4.82}}
 
-        >>> pipeline.get_all_datasets_for_image_with_name(1)
+        >>> image_json_pair=ImageJsonPair(1, 'json/simple_demo_1.json')
         Traceback (most recent call last):
             ...
-        ValueError: image_name must be a string
-        >>> pipeline.get_all_datasets_for_image_with_name('images/blank.png')
-        Traceback (most recent call last):
-            ...
-        Exception: couldn't get any connected components for images/blank.png
+        TypeError: image_name must be a string
 
-        :param image_name:
-        :return:
         """
         datasets = []
-
-        all_ccms = all_connected_component_matrices(self.image_json_pair)
+        all_ccms = self.all_connected_component_matrices()
 
         if not all_ccms:
             raise Exception("couldn't get any connected components for " + image_json_pair.get_image_name())
