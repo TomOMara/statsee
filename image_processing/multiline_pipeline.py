@@ -149,6 +149,40 @@ class MultilinePipeline:
 
         return masks
 
+
+    def transform_colour_image(self, image):
+        """
+        Transform image into YUV Space and back. Reference: See page 120 of OpenCV: Computer Vision Projects with Python
+        :param image:
+        :return:
+        """
+        image_yuv = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+
+        # equalize the histogram of the Y channel
+        image_yuv[:, :, 0] = cv2.equalizeHist(image_yuv[:, :, 0])
+
+        # convert the YUV image back to RGB format
+        image_output = cv2.cvtColor(image_yuv, cv2.COLOR_YUV2BGR)
+
+
+        # dilate colour image
+        dilated_channels = []
+        from scipy import ndimage
+
+        for channel in cv2.split(image):
+            dilated_channel = ndimage.grey_erosion(channel, size=(3, 3))
+            dilated_channels.append(dilated_channel)
+        dilated_channels = np.asarray(dilated_channels)
+        dilated_image = cv2.merge((dilated_channels[0],
+                                  dilated_channels[1],
+                                  dilated_channels[2]))
+
+        # return dilated_image
+        return dilated_image
+
+
+
+
     def get_datapoints_from_ccm(self, ccm):
         """ returns data points for any ccm """
         if self.image_json_pair.is_continuous():
