@@ -38,7 +38,7 @@ class ImageJsonPair:
     def get_x_axis_labels(self):
         # TODO
         if not self.x_axis_labels:
-            self.x_axis_labels = [str(x) for x in range(1, 5)] #14 broke TODO: SOME KIND OF RELATIONSHIP HERE with this
+            self.x_axis_labels = [str(x) for x in range(1, 6)] # TODO: 6 is the minimum here. we will not always get that luxury. write test and fix.
 
         return self.x_axis_labels
 
@@ -77,6 +77,6 @@ class ImageJsonPair:
         label_positions = get_averaged_x_label_anchors(x_labels=self.get_x_axis_labels(),
                                                        x_width=self.get_x_axis_width())
         if self.is_continuous():
-            return [int(pos) for pos in expand_data_array(label_positions, 3)]
+            return [int(pos) for pos in expand_data_array(label_positions, 7)]
         else:
             return [int(pos) for pos in label_positions]
