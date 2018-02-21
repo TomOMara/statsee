@@ -78,11 +78,6 @@ def remove_grid_lines(image):
     gray_image = grayscale_image(image)
     binary_image_without_grid = binarize_image(gray_image, 20)
 
-    if DEBUG:
-        show_image(image)
-        show_image(gray_image)
-        show_image(binary_image_without_grid)
-
     return binary_image_without_grid
 
 
