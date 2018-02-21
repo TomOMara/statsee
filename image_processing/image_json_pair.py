@@ -5,14 +5,26 @@ from helpers import expand_data_array
 class ImageJsonPair:
 
     def __init__(self, image_name, json_name):
+
+        if not isinstance(image_name, str):
+            raise TypeError('image_name must be a string')
+
+        if not isinstance(json_name, str):
+            raise TypeError('image_name must be a string')
+
         self.json_name = json_name
         self.image_name = image_name
+        self.image = cv2.imread(image_name)
+        self.x_axis_labels = None
 
     def get_image_name(self):
         return self.image_name
 
     def get_image(self):
-        return cv2.imread(self.image_name)
+        return self.image
+
+    def set_image(self, image):
+        self.image = image
 
     def get_json_name(self):
         return self.json_name
@@ -25,7 +37,13 @@ class ImageJsonPair:
 
     def get_x_axis_labels(self):
         # TODO
-        return ["1", "2", "3", "4"]
+        if not self.x_axis_labels:
+            self.x_axis_labels = [str(x) for x in range(1, 5)] #14 broke TODO: SOME KIND OF RELATIONSHIP HERE with this
+
+        return self.x_axis_labels
+
+    def set_x_axis_labels(self, new_labels):
+        self.x_axis_labels = new_labels
 
 
     def get_x_axis_width(self):
@@ -55,6 +73,10 @@ class ImageJsonPair:
                self.get_y_axis_val_max()
 
     def get_label_positions(self):
+
         label_positions = get_averaged_x_label_anchors(x_labels=self.get_x_axis_labels(),
-                                            x_width=self.get_x_axis_width())
-        return [int(pos) for pos in expand_data_array(label_positions, 2)]
+                                                       x_width=self.get_x_axis_width())
+        if self.is_continuous():
+            return [int(pos) for pos in expand_data_array(label_positions, 3)]
+        else:
+            return [int(pos) for pos in label_positions]
