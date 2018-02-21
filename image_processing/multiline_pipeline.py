@@ -8,8 +8,9 @@ plt.interactive(False)
 
 
 class MultilinePipeline:
-    def __init__(self, image_json_pair, parse_resolution, should_run_tests=False):
+    def __init__(self, image_json_pair, parse_resolution, should_run_tests=False, should_illustrate_steps=False):
         self.should_run_tests = should_run_tests
+        self.should_illustrate_steps = should_illustrate_steps
         self.parse_resolution = parse_resolution
         self.image_json_pair = image_json_pair
         self.datasets = None
@@ -139,22 +140,24 @@ if __name__ == '__main__':
     #     clear_tmp_on_run()
     #     tests()
 
-    test_images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_3.png', 'simple_demo_4.png',
-                   'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
-                   'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png',
-                   'hard_demo_five.png',
-                   'e_hard_one.png', 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
-    # test_images = ['e_hard_one.png']# 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
-    # test_images = ['e_hard_four.png']
-    # test_images = ['double_demo_one.png']
+    # test_images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_3.png', 'simple_demo_4.png',
+    #                'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
+    #                'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png',
+    #                'hard_demo_five.png', 'e_hard_one.png', 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
+    # # test_images = ['e_hard_one.png']# 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
+    test_images = ['e_hard_one.png']
+    # test_images = ['many_coloured_curves.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
-    pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('simple_demo_1.png', 'json/simple_demo_1.json'),
-                                 parse_resolution=2, should_run_tests=False)
+    # pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('simple_demo_1.png', 'json/simple_demo_1.json'),
+    #                              parse_resolution=2, should_run_tests=False)
 
     for image in test_images:
         image_json_pair = ImageJsonPair('images/' + image, 'json/simple_demo_1.json')
-        pipeline = MultilinePipeline(image_json_pair=image_json_pair, parse_resolution=3, should_run_tests=False)
+        pipeline = MultilinePipeline(image_json_pair=image_json_pair,
+                                     parse_resolution=2,
+                                     should_run_tests=False,
+                                     should_illustrate_steps=True)
         pipeline.run()
-        pipeline.datasets
+        # pipeline.print_output()
