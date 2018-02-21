@@ -75,6 +75,80 @@ class MultilinePipeline:
         dict = format_dataset_to_dictionary(datasets)
         return dict
 
+    def all_connected_component_matrices(self):
+        """ returns array of all connected component matrices """
+        ccms = []
+        split_images = self.original_image_split_by_curves()
+
+        if not split_images:
+            return None
+
+        for split_image in split_images:
+            # binary_image = preprocess_image(split_image)  # already a binary image
+            assert (len(split_image.shape) == 2)
+            ccm = get_cc_matrix_from_binary_image(split_image)
+            ccms.append(ccm)
+
+            # if self.should_illustrate_steps:
+            #     show_image(split_image)
+
+        return ccms
+
+    def original_image_split_by_curves(self):
+        """
+        Produces array of images split by curves, i.e if image had N curves,
+        this should produce array of N images, one with each curve on it.
+        """
+        images_split_by_curve_colour = self.graphs_split_by_curve_colour()
+
+        if not images_split_by_curve_colour:
+            return image_json_pair.get_image()
+
+        return images_split_by_curve_colour
+
+    def graphs_split_by_curve_colour(self):
+        """
+
+        """
+        masks = []
+
+        transformed_colour_image = self.transform_colour_image(self.image_json_pair.get_image())
+        self.image_json_pair.set_image(transformed_colour_image)
+
+        coloured_ranges = get_colour_ranges_from_image(image_json_pair=self.image_json_pair)
+
+        if not coloured_ranges:
+            return None
+
+        for coloured_range in set(coloured_ranges):
+            upper_range, lower_range = coloured_range
+            lower_range = np.asarray([i for i in lower_range])
+            upper_range = np.asarray([i for i in upper_range])
+
+            mask = cv2.inRange(self.image_json_pair.get_image(), lower_range, upper_range)
+
+            if self.should_illustrate_steps:
+                show_image(self.image_json_pair.get_image())
+                show_image(mask)
+
+            # check here that there aren't more than two lines in this mask.
+            # if there are then need to split up old fashion way
+            n_curves_in_binary_mask = get_number_of_curves_in_binary_image(mask,
+                                                                           label_positions=self.image_json_pair.get_label_positions())
+
+            if n_curves_in_binary_mask > 1:
+                split_masks_with_same_colour_curves = handle_same_colour_lines_in_mask(mask,
+                                                                                       image_json_pair=self.image_json_pair)
+                print(len(split_masks_with_same_colour_curves))
+                [masks.append(split_mask) for split_mask in split_masks_with_same_colour_curves]
+            else:
+                masks.append(mask)
+
+        if self.should_illustrate_steps:
+            [show_image(mask) for mask in masks]
+
+        return masks
+
     def get_datapoints_from_ccm(self, ccm):
         """ returns data points for any ccm """
         if self.image_json_pair.is_continuous():
