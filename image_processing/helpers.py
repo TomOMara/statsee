@@ -135,7 +135,7 @@ def format_dataset_to_dictionary(datasets):
         raise ValueError("curve coordinate should be a tuple")
 
     dataset_dict = {}
-    possible_curve_keys = ['A', 'B', 'C', 'D', 'E', 'F']
+    possible_curve_keys = map(chr, range(65, 91))
 
     for curve in datasets:
         curve_dict = dict()
@@ -144,7 +144,11 @@ def format_dataset_to_dictionary(datasets):
         for coord in curve:
             curve_dict[coord[0]] = coord[1]
 
+        curve_dict = {int(k): v for k, v in curve_dict.items()}
+
         dataset_dict[possible_curve_keys.pop(0)] = curve_dict
+
+
 
     return dataset_dict
 
