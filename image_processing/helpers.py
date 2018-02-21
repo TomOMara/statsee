@@ -209,18 +209,6 @@ def get_x_label_positions(x_labels, x_width):
 
     return label_positions
 
-
-
-def image_is_descrete(image):
-    """ This will axis type from REV and return true if discrete"""
-    return True  # TODO
-
-
-def image_is_continuous(image):
-    """ This will axis type from REV and return true if continuous"""
-    return False  # TODO
-
-
 def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
     """
     Given a binary image containing many components, generate a cc_matrix
@@ -302,7 +290,7 @@ def get_colour_ranges_from_image(image_json_pair):
     :return: upper_range, lower_range where a range is [b g r] colour range
     """
     label_positions = get_averaged_x_label_anchors(x_labels=image_json_pair.get_x_axis_labels(), x_width=image_json_pair.get_x_axis_width())
-    label_positions = [int(pos) for pos in expand_data_array(label_positions, 3)]
+    label_positions = [int(pos) for pos in expand_data_array(label_positions, factor=3)]
     cuts = get_coloured_cuts_for_image(image_json_pair.get_image(), label_positions)
     colour_ranges = get_rgb_range_of_edges_in_cuts(cuts)
 
@@ -380,8 +368,6 @@ def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
         cuts.append(cut)
 
     return cuts
-
-
 
 
 def pry():
