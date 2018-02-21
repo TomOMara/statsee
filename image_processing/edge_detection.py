@@ -91,25 +91,65 @@ def get_rgb_range_of_edges_in_cuts(cuts):
         return None
 
     for edge_height in most_coord_ranges_found:
-        rgb_bounds_for_current_edge = get_lower_and_upper_bound_for_edge_in_channels_with_index_using_cut(cuts[index_of_cut_with_most_edges],
-                                                                            edge_height)
+        rgb_bounds_for_current_edge = get_lower_and_upper_bound_colour_range_for_edge(cuts[index_of_cut_with_most_edges],
+                                                                                      edge_height)
         rgb_ranges.append(rgb_bounds_for_current_edge)
 
     return rgb_ranges
 
 
-def get_lower_and_upper_bound_for_edge_in_channels_with_index_using_cut(cut, edge_height_tuple):
+def get_lower_and_upper_bound_colour_range_for_edge(cut, edge_height_tuple):
     # 2d cut (with rgb channels)
     assert(len(cut.shape) == 2)
 
     channel_b = column(cut, 0)
     channel_g = column(cut, 1)
     channel_r = column(cut, 2)
+    centered_edge_height_tuple = edge_height_tuple
+    import math
+    pixels_in_edge = edge_height_tuple[1] - edge_height_tuple[0] + 1
+    print("pixels in edge = ", pixels_in_edge)
+    #
+    # # filter out colours that are not present in edges center
+    #
+    # # only one colour present in edges center, ignore the others (strict range policy)
+    if pixels_in_edge > 2:
+        center_index = edge_height_tuple[0] + int(math.ceil(pixels_in_edge / 2.0)) - 1
+        centered_edge_height_tuple = (center_index, center_index)
+    # #
+    # if pixels_in_edge == 3:
+    #     centered_edge_height_tuple = (edge_height_tuple[0], edge_height_tuple[0] + 1)
+    #
+    # # two possibly different colours present in edge center, get range between them both (mild range policy)
+    # if pixels_in_edge >= 4:
+    #     centered_edge_height_tuple = (edge_height_tuple[0] + 1, edge_height_tuple[1] - 1)
+    # else:
+    #     centered_edge_height_tuple = (edge_height_tuple[0], edge_height_tuple[1])
+
+    # get range between start to finish of edge. (relaxed range policy)
+
+    # TODO: having a strict range policy causes the following: given an edge which is 3px tall, the center colour
+    # TODO: value of the pixel could change as you move along the x axis, i.e if the image shade brightens (tends toward
+    # TODO: 255 i.e a bright side of a photo reflecting camera flash. ergo choosing one of these center colours means
+    # TODO: we only get really the first 10th of the curve, everything after is to bright 'orange' to be caught within range.
+
+
+    #TODO: having a relaxed policy causes the following: given a number of different coloured edges, a line with a significant
+    #TODO: COLOUR gradient will have a large colour range. using a wide colour range will net other parts of other lines,
+    #TODO: that we dont want. causing the pipeline to assume there are multiple lines of the same colour and push the mask through
+    #TODO: the same line colour processor.
+
+    #TODO: In effect, we want the range policy to be tight enough so we dont get other coloured lines when we call
+    #TODO: cv2.inRange(lower, upper). which leads to more datasets than we expect. but we want it loose enough so
+    #TODO: so things which are of same colour but different intensity/shade are caught within the lower and uper
+    #TODO: parameters of in range
+
+
 
     # minimum and maximum R values for this edge
-    edge_channel_b = [channel_b[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])] or [channel_b[edge_height_tuple[0]]]
-    edge_channel_g = [channel_g[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])] or [channel_g[edge_height_tuple[0]]]
-    edge_channel_r = [channel_r[i] for i in range(edge_height_tuple[0], edge_height_tuple[1])] or [channel_r[edge_height_tuple[0]]]
+    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
 
     u_b = max(edge_channel_b)
     u_g = max(edge_channel_g)

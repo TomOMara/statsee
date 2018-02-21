@@ -135,7 +135,7 @@ def format_dataset_to_dictionary(datasets):
         raise ValueError("curve coordinate should be a tuple")
 
     dataset_dict = {}
-    possible_curve_keys = ['A', 'B', 'C', 'D', 'E', 'F']
+    possible_curve_keys = map(chr, range(65, 91))
 
     for curve in datasets:
         curve_dict = dict()
@@ -144,7 +144,11 @@ def format_dataset_to_dictionary(datasets):
         for coord in curve:
             curve_dict[coord[0]] = coord[1]
 
+        curve_dict = {int(k): v for k, v in curve_dict.items()}
+
         dataset_dict[possible_curve_keys.pop(0)] = curve_dict
+
+
 
     return dataset_dict
 
@@ -205,18 +209,6 @@ def get_x_label_positions(x_labels, x_width):
 
     return label_positions
 
-
-
-def image_is_descrete(image):
-    """ This will axis type from REV and return true if discrete"""
-    return True  # TODO
-
-
-def image_is_continuous(image):
-    """ This will axis type from REV and return true if continuous"""
-    return False  # TODO
-
-
 def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
     """
     Given a binary image containing many components, generate a cc_matrix
@@ -265,15 +257,15 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
     return cc_matrix
 
 
-def get_seeds_from_image(image, label_positions):
+def get_seeds_from_mask(mask, image_json_pair):
     """
      This returns an array of tuples containing coordinates where we are certain there is a unique line.
 
-    :param image:
+    :param mask:
     :return: coordinates of lines in seeds
     """
-
-    cuts = get_cuts_for_image(image, label_positions)
+    label_positions = image_json_pair.get_label_positions()
+    cuts = get_cuts_for_image(mask, label_positions)
 
     # get coordinate & append to seeds
     seeds = get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions)
@@ -281,16 +273,15 @@ def get_seeds_from_image(image, label_positions):
     return seeds
 
 
-def get_number_of_curves_in_binary_image(binary_image, image_json_pair):
-    label_positions = get_averaged_x_label_anchors(x_labels=image_json_pair.get_x_axis_labels(), x_width=image_json_pair.get_x_axis_width())
-    label_positions = [int(pos) for pos in expand_data_array(label_positions, 2)]
+def get_number_of_curves_in_binary_image(binary_image, label_positions):
+
     cuts = get_cuts_for_image(binary_image, label_positions)
     n_curves = get_number_of_curves_in_cuts(cuts)
 
     return n_curves
 
 
-def get_colour_ranges_from_image(image, image_json_pair):
+def get_colour_ranges_from_image(image_json_pair):
     """
     Returns two arrays, upper and lower bound colour ranges for each colour found on a line
     in an image
@@ -299,8 +290,8 @@ def get_colour_ranges_from_image(image, image_json_pair):
     :return: upper_range, lower_range where a range is [b g r] colour range
     """
     label_positions = get_averaged_x_label_anchors(x_labels=image_json_pair.get_x_axis_labels(), x_width=image_json_pair.get_x_axis_width())
-    label_positions = [int(pos) for pos in expand_data_array(label_positions, 3)]
-    cuts = get_coloured_cuts_for_image(image, label_positions)
+    label_positions = [int(pos) for pos in expand_data_array(label_positions, factor=3)]
+    cuts = get_coloured_cuts_for_image(image_json_pair.get_image(), label_positions)
     colour_ranges = get_rgb_range_of_edges_in_cuts(cuts)
 
     return colour_ranges
@@ -312,13 +303,13 @@ def graphs_split_by_curve_style(original_image):
     return images_of_curves_split_by_style
 
 
-def handle_same_colour_lines_in_mask(in_mask):
+def handle_same_colour_lines_in_mask(in_mask, image_json_pair):
     # first we pre-process the image only removing lines that aren't thick i.e graph lines
     split_masks = []
     h, w = in_mask.shape
 
     in_mask = dilate_image(in_mask)
-    seeds = get_seeds_from_image(in_mask, )
+    seeds = get_seeds_from_mask(in_mask, image_json_pair=image_json_pair)
 
     if not seeds:
         return None
@@ -337,98 +328,6 @@ def handle_same_colour_lines_in_mask(in_mask):
         split_masks.append(mask)
     return split_masks
 
-
-def graphs_split_by_curve_colour(original_image, image_json_pair):
-    """
-    for coloured graphs! ->
-        # first we pre-process the image
-            # only removing lines that aren't thick i.e graph lines
-        # then we get the amount of separate blobs from several cuts along the x axis and take the highest number
-        # ( to reduce chance of gap between dashes )
-        # n_lines = 3 for instance
-        # then we get the cut where n_lines was highest
-        # then we get the central! pixel in each blob
-        # then we determine the colour of this pixel
-        # then we look a the original image again, filtering any colours that aren't this colour ( or v close too )
-        # then we have a graph which only contains the colour of the line we want
-        # then we have each graph to split_images array
-        # repeat until n_lines is 0
-    """
-    masks = []
-    coloured_ranges = get_colour_ranges_from_image(original_image, image_json_pair=image_json_pair)
-
-    if coloured_ranges == None:
-        return None
-
-    for coloured_range in coloured_ranges:
-        upper_range, lower_range = coloured_range
-        lower_range = np.asarray([i for i in lower_range])
-        upper_range = np.asarray([i for i in upper_range])
-
-        mask = cv2.inRange(original_image, lower_range, upper_range)
-        # check here that there aren't more than two lines in this mask.
-        # if there are then need to split up old fashion way
-        n_curves_in_binary_mask = get_number_of_curves_in_binary_image(mask, image_json_pair=image_json_pair)
-
-        if n_curves_in_binary_mask > 1:
-            split_masks_with_same_colour_curves = handle_same_colour_lines_in_mask(mask)
-            for split_mask in split_masks_with_same_colour_curves:
-                masks.append(split_mask)
-            # return masks
-        else:
-            masks.append(mask)
-
-    return masks
-
-
-def original_image_split_by_curves(original_image, image_json_pair):
-    """
-    Produces array of images split by curves, i.e if image had N curves,
-    this should produce array of N images, one with each curve on it.
-    """
-    split_images = []
-
-    # logic here which identifies number of curves
-    # split_images.append(graphs_split_by_curve_colour(original_image) +
-    #                      graphs_split_by_curve_style(original_image))
-
-    images_split_by_curve_colour = graphs_split_by_curve_colour(original_image, image_json_pair=image_json_pair)
-
-    if not images_split_by_curve_colour: return None
-
-    for split_image in images_split_by_curve_colour:
-        split_images.append(split_image)
-
-    # TODO: loop again over graphs split by curve style..
-
-    """
-    For different line styles: 
-
-    """
-
-    # If there are not multiple curves, just return original.
-    if not split_images:
-        split_images.append(original_image)
-    # for the moment just return the original image
-    return split_images
-
-
-def all_connected_component_matrices(original_image, image_json_pair):
-    """ returns array of all connected component matrices """
-    ccms = []
-
-    split_images = original_image_split_by_curves(original_image, image_json_pair=image_json_pair)
-
-    if not split_images: return None
-
-    for split_image in split_images:
-        # binary_image = preprocess_image(split_image)  # already a binary image
-        assert (len(split_image.shape) == 2)
-        ccm = get_cc_matrix_from_binary_image(split_image)
-
-        ccms.append(ccm)
-
-    return ccms
 
 
 def get_x_y_coord_list(x_labels, y_coords):
@@ -469,8 +368,6 @@ def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
         cuts.append(cut)
 
     return cuts
-
-
 
 
 def pry():
