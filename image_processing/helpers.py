@@ -144,7 +144,7 @@ def format_dataset_to_dictionary(datasets):
         for coord in curve:
             curve_dict[coord[0]] = coord[1]
 
-        curve_dict = {int(k): v for k, v in curve_dict.items()}
+        curve_dict = {float(k): v for k, v in curve_dict.items()}
 
         dataset_dict[possible_curve_keys.pop(0)] = curve_dict
 
