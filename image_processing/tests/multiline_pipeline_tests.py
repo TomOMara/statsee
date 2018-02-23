@@ -9,7 +9,7 @@ from ..multiline_pipeline import *
 @pytest.fixture
 def pipeline(input_image):
     pipeline = MultilinePipeline(input_image,
-                                 parse_resolution=5,
+                                 parse_resolution=2,
                                  should_run_tests=False,
                                  should_illustrate_steps=False)
     return pipeline
@@ -28,14 +28,13 @@ def number_of_curves_in(dataset):
 def trend_of(curve, error_rate):
     point_values = []
     result = ""
-    curve = {int(k) : v for k, v in curve.items()}
+    curve = {float(k): v for k, v in curve.items()}
     for point_name, point_value in sorted(curve.iteritems()):
-        print point_value
         point_values.append(point_value)
 
     print(point_values)
-    last_value = point_values[-1]
-    first_value = point_values[0]
+    last_value = next((i for i in reversed(point_values) if i is not None), None)
+    first_value = next((i for i in point_values if i is not None), None)
 
     if last_value < first_value:
         result += "negative"
@@ -62,17 +61,30 @@ def acceptable_error_rate(image):
 
 @pytest.fixture
 def each_value_is_the_same(arr_of_values):
-    return len(set(arr_of_values)) == 1
+    if len(set(arr_of_values)) <= 2 and None in set(arr_of_values):
+        return True
+    else:
+        return False
 
 
 def deltas(arr):
-    return [arr[idx + 1] - arr[idx] for idx in range(len(arr) - 1)]
+    return [arr[idx + 1] - arr[idx] for idx in range(len(arr) - 1) if arr[idx+1] and arr[idx] is not None]
 
 
 def each_delta_is_the_same(arr_of_values, acceptable_error_rate):
-    print deltas(arr_of_values)
+    """
+    Compare all values against the first non 'None' value. if all are within an acceptable range, noted by acceptable error
+    rate, return true, otherwise false.
+    :param arr_of_values:
+    :param acceptable_error_rate:
+    :return: Boolean
+    """
+    print arr_of_values, 'gives deltas: ', deltas(arr_of_values)
     delts = deltas(arr_of_values)
-    return all(delts[0] - acceptable_error_rate <= x <= delts[0] + acceptable_error_rate for x in delts)
+    each_value_is_the_same = all(delts[0]**2 - acceptable_error_rate**2 <= x**2 <= delts[0]**2 + acceptable_error_rate**2 for x in delts)
+
+    print 'each delta is the same: ', each_value_is_the_same
+    return each_value_is_the_same
 
 
 def test_simple_demo_one():
@@ -275,6 +287,36 @@ def test_colour_ranges_produce_correct_number_of_curves():
         assert trend_of(curve_B, e) == "negative constant"
         assert trend_of(curve_C, e) == "negative constant"
         assert trend_of(curve_D, e) == "negative constant"
+
+
+def test_similar_results_for_continuous_and_discrete_parsing():
+    # test e hard one as this is where we have had the regression
+    # in this issue https://github.com/TomOMara/statsee/issues/5
+    input = image('e_hard_one.png')
+    input.set_to_discrete()
+
+    pipe = pipeline(input)
+    e = acceptable_error_rate(input)
+    pipe.run()
+    assert number_of_curves_in(pipe.datasets) == 2
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    assert trend_of(curve_A, e) == "horizontal constant"
+    assert trend_of(curve_B, e) == "negative curve"
+    assert curve_A != curve_B
+
+    input = image('e_hard_one.png')
+    input.set_to_continuous()
+
+    pipe = pipeline(input)
+    e = acceptable_error_rate(input)
+    pipe.run()
+    assert number_of_curves_in(pipe.datasets) == 2
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    assert trend_of(curve_A, e) == "horizontal constant"
+    assert trend_of(curve_B, e) == "negative curve"
+    assert curve_A != curve_B
 
 
 """

@@ -16,6 +16,8 @@ class ImageJsonPair:
         self.image_name = image_name
         self.image = cv2.imread(image_name)
         self.x_axis_labels = None
+        self.is_continuous = True
+        self.is_discrete = False # make discrete by default
 
     def get_image_name(self):
         return self.image_name
@@ -45,26 +47,31 @@ class ImageJsonPair:
     def set_x_axis_labels(self, new_labels):
         self.x_axis_labels = new_labels
 
-
     def get_x_axis_width(self):
         # TODO
         return 813
-
 
     def get_y_axis_pixel_height(self):
         # TODO
         return 362
 
-
     def get_y_axis_val_max(self):
         # TODO
         return 9
 
-    def is_continuous(self):
-        return False
+    def get_is_continuous(self):
+        return self.is_continuous
 
-    def is_discrete(self):
-        return True
+    def get_is_discrete(self):
+        return self.is_discrete
+
+    def set_to_continuous(self):
+        self.is_discrete = False # for good measure
+        self.is_continuous = True
+
+    def set_to_discrete(self):
+        self.is_continuous = False
+        self.is_discrete = True
 
     def get_graph_labels_and_size(self):
         return self.get_x_axis_labels(), \
@@ -76,7 +83,4 @@ class ImageJsonPair:
 
         label_positions = get_averaged_x_label_anchors(x_labels=self.get_x_axis_labels(),
                                                        x_width=self.get_x_axis_width())
-        if self.is_continuous():
-            return [int(pos) for pos in expand_data_array(label_positions, 7)]
-        else:
-            return [int(pos) for pos in label_positions]
+        return [int(pos) for pos in label_positions]
