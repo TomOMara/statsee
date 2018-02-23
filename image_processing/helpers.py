@@ -257,11 +257,11 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
     return cc_matrix
 
 
-def connect_probable_dashes(binary_mask, probable_dash_max=150, probable_dash_min=10):
+def connect_and_split_probable_dashes(binary_mask, probable_dash_max=150, probable_dash_min=10):
 
     connected_components = measure.label(binary_mask, background=0, neighbors=8)
     probable_dashes = []
-    cc_matrix = np.zeros(binary_mask.shape, dtype="uint8")
+    cc_matrices = []
     for component in np.unique(connected_components):
         # ignore black component
         if component == 0:
@@ -283,14 +283,17 @@ def connect_probable_dashes(binary_mask, probable_dash_max=150, probable_dash_mi
         # if the number of pixels in the component is sufficiently
         # large, then add it to our matrix of large components
         if component_pixels_count > probable_dash_max:
-            cc_matrix = cv2.add(cc_matrix, component_mask)
+            cc_matrix = cv2.add(np.zeros(binary_mask.shape, dtype="uint8"), component_mask)
+            cc_matrices.append(cc_matrix)
 
     # if no large ccm but some dashes
     if len(probable_dashes) > 3: # arbitrary
-        connected_dashes = connect_dashes(probable_dashes, cc_matrix)
-        return connected_dashes
+        connected_dashes = connect_dashes(probable_dashes, np.zeros(binary_mask.shape, dtype="uint8"))
+        cc_matrices.append(connected_dashes)
 
-    return cc_matrix
+    # return cc_matrix
+    return cc_matrices
+
 
 def get_seeds_from_mask(mask, image_json_pair):
     """
@@ -343,25 +346,25 @@ def handle_same_colour_lines_in_mask(in_mask, image_json_pair):
     split_masks = []
     h, w = in_mask.shape
 
-    in_mask = connect_probable_dashes(in_mask) # this will connect dashes.
+    in_masks = connect_and_split_probable_dashes(in_mask)
+    for in_mask in in_masks:
+        seeds = get_seeds_from_mask(in_mask, image_json_pair=image_json_pair)
 
-    seeds = get_seeds_from_mask(in_mask, image_json_pair=image_json_pair)
+        if not seeds:
+            return None
 
-    if not seeds:
-        return None
+        floodflags = 8
+        floodflags |= cv2.FLOODFILL_MASK_ONLY
+        floodflags |= (255 << 8)
 
-    floodflags = 8
-    floodflags |= cv2.FLOODFILL_MASK_ONLY
-    floodflags |= (255 << 8)
+        # create a mask from each seed which is
+        for seed in seeds:
+            mask = np.zeros((h + 2, w + 2), np.uint8)
+            num, im, mask, rect = cv2.floodFill(in_mask, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
 
-    # create a mask from each seed which is
-    for seed in seeds:
-        mask = np.zeros((h + 2, w + 2), np.uint8)
-        num, im, mask, rect = cv2.floodFill(in_mask, mask, seed, (255, 0, 0), (10,) * 3, (10,) * 3, floodflags)
+            mask = remove_mask_border(mask=mask)
 
-        mask = remove_mask_border(mask=mask)
-
-        split_masks.append(mask)
+            split_masks.append(mask)
     return split_masks
 
 
