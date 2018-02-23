@@ -279,6 +279,18 @@ def test_e_hard_two():
     assert trend_of(curve_B, e) == "negative curve"
     assert curve_A != curve_B
 
+def test_e_hard_three():
+    input = image('e_hard_three.png')
+    pipe = pipeline(input)
+    e = acceptable_error_rate(input)
+    pipe.run()
+    assert number_of_curves_in(pipe.datasets) == 2
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    assert trend_of(curve_A, e) == "horizontal constant"
+
+    assert trend_of(curve_B, e) == "negative curve"
+    assert curve_A != curve_B
 
 
 def test_colour_ranges_produce_correct_number_of_curves():

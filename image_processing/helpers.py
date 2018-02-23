@@ -6,6 +6,8 @@ from json_parser import *
 import numpy as np
 from edge_detection import *
 from preprocessing import *
+from skimage import measure
+import numpy as np
 
 
 def expand_data_array(data_array, factor):
@@ -218,8 +220,6 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
     :param min_connected_pixels:
     :return:
     """
-    from skimage import measure
-    import numpy as np
 
     connected_components = measure.label(binary_image, background=0, neighbors=8)
     cc_matrix = np.zeros(binary_image.shape, dtype="uint8")
@@ -256,6 +256,41 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
 
     return cc_matrix
 
+
+def connect_probable_dashes(binary_mask, probable_dash_max=150, probable_dash_min=10):
+
+    connected_components = measure.label(binary_mask, background=0, neighbors=8)
+    probable_dashes = []
+    cc_matrix = np.zeros(binary_mask.shape, dtype="uint8")
+    for component in np.unique(connected_components):
+        # ignore black component
+        if component == 0:
+            continue
+
+        # otherwise, construct the component mask and count the
+        # number of pixels
+        component_mask = np.zeros(binary_mask.shape, dtype="uint8")
+        component_mask[connected_components == component] = 255  # inject our component into the mask
+        component_pixels_count = cv2.countNonZero(component_mask)
+
+        # if we have a large number of roughly equally sized components
+        # then we are looking at a dashed line (probably)
+
+        # if component is not an artifact BUT too small to be full line
+        if probable_dash_min < component_pixels_count < probable_dash_max:
+            probable_dashes.append(component_mask)  # inject our component into the mask
+
+        # if the number of pixels in the component is sufficiently
+        # large, then add it to our matrix of large components
+        if component_pixels_count > probable_dash_max:
+            cc_matrix = cv2.add(cc_matrix, component_mask)
+
+    # if no large ccm but some dashes
+    if len(probable_dashes) > 3: # arbitrary
+        connected_dashes = connect_dashes(probable_dashes, cc_matrix)
+        return connected_dashes
+
+    return cc_matrix
 
 def get_seeds_from_mask(mask, image_json_pair):
     """
@@ -307,6 +342,8 @@ def handle_same_colour_lines_in_mask(in_mask, image_json_pair):
     # first we pre-process the image only removing lines that aren't thick i.e graph lines
     split_masks = []
     h, w = in_mask.shape
+
+    in_mask = connect_probable_dashes(in_mask) # this will connect dashes.
 
     seeds = get_seeds_from_mask(in_mask, image_json_pair=image_json_pair)
 
