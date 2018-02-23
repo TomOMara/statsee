@@ -277,6 +277,36 @@ def test_colour_ranges_produce_correct_number_of_curves():
         assert trend_of(curve_D, e) == "negative constant"
 
 
+def test_similar_results_for_continuous_and_discrete_parsing():
+    # test e hard one as this is where we have had the regression
+    # in this issue https://github.com/TomOMara/statsee/issues/5
+    input = image('e_hard_one.png')
+    input.set_to_discrete()
+
+    pipe = pipeline(input)
+    e = acceptable_error_rate(input)
+    pipe.run()
+    assert number_of_curves_in(pipe.datasets) == 2
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    assert trend_of(curve_A, e) == "horizontal constant"
+    assert trend_of(curve_B, e) == "negative curve"
+    assert curve_A != curve_B
+
+    input = image('e_hard_one.png')
+    input.set_to_continuous()
+
+    pipe = pipeline(input)
+    e = acceptable_error_rate(input)
+    pipe.run()
+    assert number_of_curves_in(pipe.datasets) == 2
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    assert trend_of(curve_A, e) == "horizontal constant"
+    assert trend_of(curve_B, e) == "negative curve"
+    assert curve_A != curve_B
+
+
 """
     Test the output for a two line image is of the format expected
 """

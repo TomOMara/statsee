@@ -179,9 +179,9 @@ class MultilinePipeline:
 
     def get_datapoints_from_ccm(self, ccm):
         """ returns data points for any ccm """
-        if self.image_json_pair.is_continuous():
+        if self.image_json_pair.get_is_continuous():
             return self.get_continuous_datapoints_for_cc_matrix(ccm)
-        if self.image_json_pair.is_discrete():
+        if self.image_json_pair.get_is_discrete():
             return self.get_discrete_datapoints_for_cc_matrix(ccm)
 
     def get_continuous_datapoints_for_cc_matrix(self, cc_matrix):
@@ -190,8 +190,8 @@ class MultilinePipeline:
 
         cuts = self.get_more_x_axis_cuts_from_ccm(cc_matrix)
         y_coords = get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height)
-        x_labels = expand_data_array(x_labels, self.parse_resolution)
-        x_y_coord_list = get_x_y_coord_list(x_labels, y_coords)
+        expanded_x_labels = expand_data_array(x_labels, self.parse_resolution)
+        x_y_coord_list = get_x_y_coord_list(expanded_x_labels, y_coords)
 
         # y coords now unadjusted
         return [x_y_coord_list]
@@ -248,7 +248,7 @@ if __name__ == '__main__':
                    'hard_demo_five.png',
                    'e_hard_one.png', 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
     # test_images = ['e_hard_one.png']# 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
-    # test_images = ['e_hard_four.png']
+    test_images = ['e_hard_one.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
