@@ -349,11 +349,16 @@ def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
         pixel_coord = verticle_position_of_edge_if_edge_present_in_cut(cuts[idx])
         if pixel_coord:
             pixel_coords.append(pixel_coord)
+        else:
+            pixel_coords.append(None)
             # pixel_coords.append(cuts[idx].tolist().index(255))
             # x = verticle_positions_of_edges_if_edges_present_in_cut(cuts[idx])
 
     # translate pixel coords to y value
     for coord in pixel_coords:
+        if coord is None:
+            y_coords.append(None)
+            continue
         y_value = y_val_max - (coord * units_per_pixel)
         y_coords.append(round(y_value, 2))
 

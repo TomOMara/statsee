@@ -162,7 +162,6 @@ def get_lower_and_upper_bound_colour_range_for_edge(cut, edge_height_tuple):
     centered_edge_height_tuple = edge_height_tuple
     import math
     pixels_in_edge = edge_height_tuple[1] - edge_height_tuple[0] + 1
-    print("pixels in edge = ", pixels_in_edge)
     #
     # # filter out colours that are not present in edges center
     #
