@@ -246,8 +246,8 @@ if __name__ == '__main__':
                    'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
                    'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png',
                    'hard_demo_five.png',
-                   'e_hard_one.png', 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
-    # test_images = ['e_hard_one.png']# 'e_hard_two.png', 'e_hard_three.png', 'e_hard_four.png']
+                   'e_hard_one.png', 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
+    # test_images = ['e_hard_one.png']# 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
     test_images = ['e_hard_one.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
