@@ -1,8 +1,36 @@
 import cv2
 import numpy as np
-from helpers import *
+from scipy import ndimage
 
 DEBUG = False
+
+
+def thicken_image_lines(image):
+    """
+    Transform image into YUV Space and back. Reference: See page 120 of OpenCV: Computer Vision Projects with Python
+    :param image:
+    :return:
+    """
+    # dilate colour image
+
+    image_with_thicker_lines = dilate_image(image)
+
+    return image_with_thicker_lines
+
+
+def dilate_image(image):
+    dilated_channels = []
+
+    for channel in cv2.split(image):
+        dilated_channel = ndimage.grey_erosion(channel, size=(3, 3))
+        dilated_channels.append(dilated_channel)
+    dilated_channels = np.asarray(dilated_channels)
+    dilated_image = cv2.merge((dilated_channels[0],
+                               dilated_channels[1],
+                               dilated_channels[2]))
+
+    # return dilated_image
+    return dilated_image
 
 
 def preprocess_image(image):
@@ -60,37 +88,10 @@ def remove_mask_border(mask):
     return cropped_mask
 
 
-def clean_image(image):
-    # TODO: implement crop to plot and uncomment below
-    # image = crop_to_plot_area(image)
-    image = remove_grid_lines(image)
-
-    return image
-
-
-def remove_grid_lines(image):
-    """
-    Function that removes grid likes from a fully coloured image and returns a binary image without grid.
-    :param image:
-    :return:
-    """
-    image = blur_image(image)
-    gray_image = grayscale_image(image)
-    binary_image_without_grid = binarize_image(gray_image, 20)
-
-    return binary_image_without_grid
-
-
 def blur_image(image):
     blur_factor = 9
     kernel_large = np.ones((blur_factor, blur_factor), np.float32) / blur_factor ** 2
     return cv2.filter2D(image, -1, kernel_large)
-
-
-def dilate_image(img):
-    kernel = np.ones((9, 9), np.uint8)
-    img_dilation = cv2.dilate(img, kernel, iterations=1)
-    return img_dilation
 
 
 def crop_to_plot_area(image):
