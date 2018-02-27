@@ -71,9 +71,10 @@ class MultilinePipeline:
 
         """
         masks = []
+        image_with_no_grid_lines = self.remove_image_grid_lines()
 
-
-        transformed_colour_image = self.transform_colour_image(self.image_json_pair.get_image())
+        # Thicken the lines so to help with floodfilling.
+        transformed_colour_image = thicken_image_lines(image_with_no_grid_lines)
         self.image_json_pair.set_image(transformed_colour_image)
 
         coloured_ranges = get_colour_ranges_from_image(image_json_pair=self.image_json_pair)
@@ -110,36 +111,26 @@ class MultilinePipeline:
 
         return masks
 
-
-    def transform_colour_image(self, image):
+    def remove_image_grid_lines(self):
         """
-        Transform image into YUV Space and back. Reference: See page 120 of OpenCV: Computer Vision Projects with Python
-        :param image:
-        :return:
+
+        :return: True or False
         """
-        image_yuv = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
 
-        # equalize the histogram of the Y channel
-        image_yuv[:, :, 0] = cv2.equalizeHist(image_yuv[:, :, 0])
+        # take a cut of the image, somewhere the middle.
+        middle_cut = get_coloured_cuts_for_image(self.image_json_pair.get_image(),
+                                                 self.image_json_pair.get_middle_label_position())
 
-        # convert the YUV image back to RGB format
-        image_output = cv2.cvtColor(image_yuv, cv2.COLOR_YUV2BGR)
+        threshold = 3
+
+        # if number of edges found in the cut over some threshold? i.e 5
+        if get_number_of_edges_in_cuts(middle_cut) > threshold:
+            return filter_out_most_common_colour_from_cut_and_return_image(middle_cut, self.image_json_pair.get_image())
+        # otherwise, probably no grid lines, dont alter the image
+        else:
+            return self.image_json_pair.get_image()
 
 
-        # dilate colour image
-        dilated_channels = []
-        from scipy import ndimage
-
-        for channel in cv2.split(image):
-            dilated_channel = ndimage.grey_erosion(channel, size=(3, 3))
-            dilated_channels.append(dilated_channel)
-        dilated_channels = np.asarray(dilated_channels)
-        dilated_image = cv2.merge((dilated_channels[0],
-                                  dilated_channels[1],
-                                  dilated_channels[2]))
-
-        # return dilated_image
-        return dilated_image
 
 
 
@@ -215,7 +206,7 @@ if __name__ == '__main__':
                    'hard_demo_five.png',
                    'e_hard_one.png', 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
     # test_images = ['e_hard_one.png']# 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
-    test_images = ['e_hard_three.png']
+    test_images = ['background_lines.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
