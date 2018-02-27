@@ -125,7 +125,7 @@ class MultilinePipeline:
 
         # if number of edges found in the cut over some threshold? i.e 5
         if get_number_of_edges_in_cuts(middle_cut) > threshold:
-            return filter_out_most_common_colour_from_cut_and_return_image(middle_cut, self.image_json_pair.get_image())
+            return filter_out_most_common_colour_from_cut_and_return_image(middle_cut, self.image_json_pair)
         # otherwise, probably no grid lines, dont alter the image
         else:
             return self.image_json_pair.get_image()
@@ -206,7 +206,7 @@ if __name__ == '__main__':
                    'hard_demo_five.png',
                    'e_hard_one.png', 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
     # test_images = ['e_hard_one.png']# 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
-    test_images = ['background_lines.png']
+    test_images = ['black_and_white_grid_lines.png']
 
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
