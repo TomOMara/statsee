@@ -314,7 +314,7 @@ def get_seeds_from_mask(mask, image_json_pair):
 def get_number_of_curves_in_binary_image(binary_image, label_positions):
 
     cuts = get_cuts_for_image(binary_image, label_positions)
-    n_curves = get_number_of_curves_in_cuts(cuts)
+    n_curves = get_number_of_edges_in_cuts(cuts)
 
     return n_curves
 
