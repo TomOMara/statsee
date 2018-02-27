@@ -257,7 +257,7 @@ def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
     return cc_matrix
 
 
-def connect_and_split_probable_dashes(binary_mask, probable_dash_max=150, probable_dash_min=10):
+def connect_and_split_probable_dashes(binary_mask, probable_dash_max=150, probable_dash_min=5):
 
     connected_components = measure.label(binary_mask, background=0, neighbors=8)
     probable_dashes = []

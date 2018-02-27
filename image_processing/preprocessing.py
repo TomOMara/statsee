@@ -4,12 +4,6 @@ from scipy import ndimage
 
 DEBUG = False
 
-def show_image(image):
-    if type(image) is str:
-        image = cv2.imread(image)
-
-    cv2.imshow("output", image)
-    cv2.waitKey(0)
 
 def thicken_image_lines(image):
     """

@@ -22,13 +22,13 @@ def apply_bitwise_on_3d_image(operation, src1, image):
     return _or
 
 
-def filter_out_most_common_colour_from_cut_and_return_image(cut, image):
+def filter_out_most_common_colour_from_cut_and_return_image(cut, image_json_pair):
 
     lower_grey = np.array([200,200,200])
     upper_grey = np.array([255,255,255])
-    black_and_white_mask_over_lines = cv2.inRange(image, lower_grey, upper_grey)
 
-    _or = apply_bitwise_on_3d_image(cv2.bitwise_or, black_and_white_mask_over_lines, image)
+    black_and_white_mask_over_lines = cv2.inRange(image_json_pair.get_image(), lower_grey, upper_grey)
+    _or = apply_bitwise_on_3d_image(cv2.bitwise_or, black_and_white_mask_over_lines, image_json_pair.get_image())
 
     return _or
 
