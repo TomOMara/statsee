@@ -1,6 +1,7 @@
 from graph_cutter import *
 import cv2
 from helpers import expand_data_array
+from math import floor
 
 class ImageJsonPair:
 
@@ -84,3 +85,9 @@ class ImageJsonPair:
         label_positions = get_averaged_x_label_anchors(x_labels=self.get_x_axis_labels(),
                                                        x_width=self.get_x_axis_width())
         return [int(pos) for pos in label_positions]
+
+    def get_middle_label_position(self):
+        label_positions = self.get_label_positions()
+        middle_label_position = int(label_positions[int(floor(len(label_positions)/2))])
+
+        return [middle_label_position]
