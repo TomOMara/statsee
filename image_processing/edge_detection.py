@@ -30,19 +30,16 @@ def get_coloured_cuts_for_image(image, positions_to_cut):
     return cuts
 
 
-def get_array_of_edge_coord_ranges(cuts, is_coloured):
-    assert(is_coloured or not is_coloured)
+def get_array_of_edge_coord_ranges(cuts):
 
     array_of_edge_coord_ranges = []
+
     for idx in range(len(cuts)):
         # get list of all edge heights
         while len(array_of_edge_coord_ranges) != len(cuts):
-            if is_coloured:
-                edge_coord_range = verticle_positions_of_edges_if_edges_present_in_cut(cuts[idx], is_coloured=True)
-            else:
-                edge_coord_range = verticle_positions_of_edges_if_edges_present_in_cut(cuts[idx], is_coloured=False)
-
+            edge_coord_range = verticle_positions_of_edges_if_edges_present_in_cut(cuts[idx])
             array_of_edge_coord_ranges.append(edge_coord_range)
+
             idx += 1
 
     return array_of_edge_coord_ranges
@@ -69,9 +66,9 @@ def get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ra
     return edge_coord_ranges_of_cut_with_most_edges, index_of_cut_with_most_edges
 
 
-def get_number_of_curves_in_cuts(cuts):
+def get_number_of_edges_in_cuts(cuts):
 
-    array_of_edge_coord_ranges = get_array_of_edge_coord_ranges(cuts, is_coloured=False)
+    array_of_edge_coord_ranges = get_array_of_edge_coord_ranges(cuts)
     most_coord_ranges_found, index_of_cut_with_most_edges = get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges)
 
     number_of_curves = len(most_coord_ranges_found or [])
@@ -79,12 +76,17 @@ def get_number_of_curves_in_cuts(cuts):
     return number_of_curves
 
 
+def is_colour_in_cuts(cuts):
+    if len(cuts[0].shape) == 2:
+        return True
+    else:
+        return False
+
+
 def get_rgb_range_of_edges_in_cuts(cuts):
-    # make sure the cut we have is coloured
-    assert(len(cuts[0].shape) == 2)
 
     rgb_ranges = []
-    array_of_edge_coord_ranges = get_array_of_edge_coord_ranges(cuts, is_coloured=True)
+    array_of_edge_coord_ranges = get_array_of_edge_coord_ranges(cuts)
     most_coord_ranges_found, index_of_cut_with_most_edges = get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges)
 
     if not most_coord_ranges_found:
@@ -249,7 +251,7 @@ def get_pixel_coordinates_of_edges_in_cuts(cuts, label_positions):
     :return: array of coordinates, coordinate for each unique edge.
     """
     pixel_coords = []
-    array_of_edge_heights = get_array_of_edge_coord_ranges(cuts, is_coloured=False)
+    array_of_edge_heights = get_array_of_edge_coord_ranges(cuts)
     cut_with_most_edges, index_of_cut_with_most_edges = get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_heights)
 
     if not cut_with_most_edges:
@@ -265,7 +267,7 @@ def verticle_position_of_edge_if_edge_present_in_cut(cut):
     # get the verticle position of the edges center
     start_index = cut.tolist().index(255) if sum(cut > 0) else False
     if start_index:
-        range_start, range_end = get_index_range_of_current_edge(cut, start_index, is_coloured=False)
+        range_start, range_end = get_index_range_of_current_edge(cut, start_index)
         center = (range_end - range_start) / 2
         rounded_center = range_start + int(round(center, 0))
 
@@ -275,15 +277,15 @@ def verticle_position_of_edge_if_edge_present_in_cut(cut):
         return start_index
 
 
-def verticle_positions_of_edges_if_edges_present_in_cut(cut, is_coloured):
+def verticle_positions_of_edges_if_edges_present_in_cut(cut):
     # This must return an array of edge heights for the entire cut
-    assert(is_coloured or not is_coloured)
-
+    is_coloured = is_colour_in_cuts([cut])
     idx = 0
     ranges = []
+
     while idx < len(cut):
         if current_is_edge(cut[idx], is_coloured):
-            range = get_index_range_of_current_edge(cut, idx, is_coloured)
+            range = get_index_range_of_current_edge(cut, idx)
             ranges.append(range)
             idx = range[1]+1  # end is second part of tuple
         else:
@@ -300,9 +302,10 @@ def current_is_edge(current, is_coloured):
         return current != 0
 
 
-def get_index_range_of_current_edge(cut, start, is_coloured):
+def get_index_range_of_current_edge(cut, start):
     """ Returns tuple with range of current edge. should be between 0-10 usually"""
     end = start
+    is_coloured = is_colour_in_cuts([cut])
 
     while current_is_edge(cut[end], is_coloured=is_coloured):
         end += 1
