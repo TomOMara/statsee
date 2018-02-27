@@ -1,3 +1,36 @@
+import cv2
+import numpy as np
+
+
+def show_image(image):
+    if type(image) is str:
+        image = cv2.imread(image)
+
+    cv2.imshow("output", image)
+    cv2.waitKey(0)
+
+
+def apply_bitwise_on_3d_image(operation, src1, image):
+    modded_channels = []
+    for channel in cv2.split(image):
+        modded_channel = operation(src1, channel)
+        modded_channels.append(modded_channel)
+    modded_channels = np.asarray(modded_channels)
+    _or = cv2.merge((modded_channels[0],
+                     modded_channels[1],
+                     modded_channels[2]))
+    return _or
+
+
+def filter_out_most_common_colour_from_cut_and_return_image(cut, image):
+
+    lower_grey = np.array([200,200,200])
+    upper_grey = np.array([255,255,255])
+    black_and_white_mask_over_lines = cv2.inRange(image, lower_grey, upper_grey)
+
+    _or = apply_bitwise_on_3d_image(cv2.bitwise_or, black_and_white_mask_over_lines, image)
+
+    return _or
 
 
 def get_cuts_for_image(image, positions_to_cut):
