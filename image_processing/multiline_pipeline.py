@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import json
 from image_json_pair import ImageJsonPair
 import doctest
+from math import floor
 
 plt.interactive(False)
 
