@@ -1,34 +1,41 @@
 from skimage.draw import line
 import numpy as np
+from scipy.spatial.distance import *
 
 
 def connect_dashes(probable_dashes, cc_matrix):
 
-    # [show_image(dash) for dash in probable_dashes]
-    #  showed dashes in top to bottom order (not left to right)
     points = get_center_coords_from_probable_dashes(probable_dashes)
+    # sort points based on x value (left to right)
     points.sort(key=lambda x: x[1])
-
     index = 0
-    row_idx = 0
-    col_idx = 1
-    while index != len(points) -2:
-        current_point = points[index]
-        closest_point = points[index + 1]
-        rr, cc = line(current_point[row_idx],
-                      current_point[col_idx],
-                      closest_point[row_idx],
-                      closest_point[col_idx])
 
-        cc_matrix[rr, cc] = 255
-        index += 1
+    while len(points) > 2:
+        current_point = points[index]
+        closest_point = closest_node(current_point, points)
+
+        if distance_between(current_point, closest_point) < 50:
+            # draw line
+            rr, cc = line(current_point[0], current_point[1],
+                          closest_point[0], closest_point[1])
+
+            cc_matrix[rr, cc] = 255
+            points.remove(current_point)
+
+        else:
+            index += 1
+
     return cc_matrix
 
-from scipy.spatial.distance import *
+
+def distance_between(a, b):
+    return cdist([a], [b])[0][0]
+
 
 def closest_node(node, nodes):
-    nodes.remove(node)
-    return nodes[cdist([node], nodes).argmin()]
+    search_nodes = [x for x in nodes if x != node]
+    out = search_nodes[cdist([node], search_nodes).argmin()]
+    return out
 
 def get_center_coords_from_probable_dashes(probable_dashes):
     points = []
