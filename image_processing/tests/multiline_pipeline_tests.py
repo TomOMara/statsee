@@ -398,6 +398,13 @@ def test_similar_results_for_continuous_and_discrete_parsing():
     assert curve_A != curve_B
 
 
+def test_blank_graph():
+    input = image('blank.png')
+    pipe = pipeline(input)
+    e = acceptable_error_rate(input)
+    assert pipe.run() == "'No curves found for image ../images/blank.png'"
+
+
 """
     Test the output for a two line image is of the format expected
 """
