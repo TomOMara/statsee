@@ -4,6 +4,7 @@ import json
 from image_json_pair import ImageJsonPair
 import doctest
 from math import floor
+from CustomExceptions import *
 
 plt.interactive(False)
 
@@ -27,6 +28,8 @@ class MultilinePipeline:
         try:
             self.datasets = self.get_all_datasets_for_image_in_pair()
             self.print_output()
+        except NoCurvesFoundException as e:
+            return str(e)
         except ValueError as e:
             print("Error: " + e.message + " couldn't complete " + self.image_json_pair.get_image_name())
 
@@ -55,7 +58,12 @@ class MultilinePipeline:
         """
         datasets = []
 
-        for curve in self.split_curves():
+        curves = self.split_curves()
+
+        if not curves:
+            raise NoCurvesFoundException(self.image_json_pair.get_image_name())
+
+        for curve in curves:
             dataset = self.get_datapoints_from_binary_curve(curve)
 
             if not dataset:
