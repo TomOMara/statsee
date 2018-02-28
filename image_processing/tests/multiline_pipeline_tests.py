@@ -305,6 +305,21 @@ def test_e_hard_four():
     assert trend_of(curve_B, e) == "negative curve"
     assert curve_A != curve_B
 
+def test_e_hard_five():
+    input = image('e_hard_five.png')
+    pipe = pipeline(input)
+    e = acceptable_error_rate(input)
+    pipe.run()
+    assert number_of_curves_in(pipe.datasets) == 3
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    curve_C = pipe.datasets['C']
+    curve_trends = [trend_of(curve, e) for curve in [curve_A, curve_B, curve_C]]
+    expected_trends = ["horizontal constant", "negative curve", "negative curve"]
+
+    assert sorted(curve_trends) == sorted(expected_trends)
+    # assert curve_A != curve_B != curve_C
+
 def test_image_with_grid_lines():
     input = image('background_lines.png')
     pipe = pipeline(input)
@@ -330,7 +345,6 @@ def test_image_with_black_and_white_grid_lines():
     assert trend_of(curve_B, e) == "positive curve"
 
     assert curve_A != curve_B
-
 
 def test_colour_ranges_produce_correct_number_of_curves():
     test_axis_labels = [x for x in range(5, 20)]
