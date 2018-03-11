@@ -194,11 +194,29 @@ def inject_line_data_into_file_with_name(file_name, dataset):
     with open(file_name) as f:
         json_data = json.load(f)
 
-    json_data.update(dataset)
+    # update series data
+    json_data.update({'series': dataset})
+
+    # update x encodings
+    json_data = update_scale(json=json_data, dataset=dataset)
 
     with open('out/' + file_name, 'w+') as f:
-        json.dump(json_data, f, indent=2, separators=(',', ':'))
+        json.dump(json_data, f, sort_keys=True, indent=2, separators=(',', ':'))
 
+def update_scale(json, dataset):
+
+    scale_values = sorted(dataset.values()[0].keys())
+    new_json = json['encoding']['x']['scale']
+
+    # update values
+    new_json['values'] = scale_values
+    new_json['domain'] = [min(scale_values), max(scale_values)]
+    new_json['labels'] = [str(val) for val in scale_values]
+    new_json['type'] = 'linear'
+
+    json['encoding']['x']['scale'] = new_json
+
+    return json
 
 def get_x_label_positions(x_labels, x_width):
     """ gets coordinates of x axis labels in pixels """
