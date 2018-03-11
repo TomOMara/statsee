@@ -1,4 +1,4 @@
-from helpers import *
+from utilities import *
 import matplotlib.pyplot as plt
 import json
 from image_json_pair import ImageJsonPair
@@ -10,12 +10,13 @@ plt.interactive(False)
 
 
 class MultilinePipeline:
-    def __init__(self, image_json_pair, parse_resolution, should_run_tests=False, should_illustrate_steps=False):
+    def __init__(self, image_json_pair, parse_resolution, should_run_tests=False, should_illustrate_steps=False, should_save=False):
         self.should_run_tests = should_run_tests
         self.should_illustrate_steps = should_illustrate_steps
         self.parse_resolution = parse_resolution
         self.image_json_pair = image_json_pair
         self.datasets = None
+        self.should_save = should_save
 
     def run(self):
 
@@ -28,6 +29,8 @@ class MultilinePipeline:
         try:
             self.datasets = self.get_all_datasets_for_image_in_pair()
             self.print_output()
+            if self.should_save:
+                self.save()
         except NoCurvesFoundException as e:
             return str(e)
         except ValueError as e:
@@ -46,10 +49,6 @@ class MultilinePipeline:
 
     def get_all_datasets_for_image_in_pair(self):
         """
-        >>> pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('images/simple_demo_1.png', 'json/simple_demo_1.json'), parse_resolution=3)
-        >>> pipeline.get_all_datasets_for_image_in_pair()
-        {'A': {'1': 4.82, '3': 4.82, '2': 4.82, '4': 4.82}}
-
         >>> image_json_pair=ImageJsonPair(1, 'json/simple_demo_1.json')
         Traceback (most recent call last):
             ...
@@ -214,8 +213,8 @@ if __name__ == '__main__':
                    'hard_demo_five.png',
                    'e_hard_one.png', 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
     # test_images = ['e_hard_one.png']# 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
-    test_images = ['black_and_white_grid_lines.png']
-
+    # test_images = ['black_and_white_grid_lines.png']
+    test_images = ['e_hard_five.png']
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
     # pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('simple_demo_1.png', 'json/simple_demo_1.json'),
@@ -226,6 +225,7 @@ if __name__ == '__main__':
         pipeline = MultilinePipeline(image_json_pair=image_json_pair,
                                      parse_resolution=2,
                                      should_run_tests=False,
-                                     should_illustrate_steps=True)
+                                     should_illustrate_steps=False,
+                                     should_save=True)
         pipeline.run()
         # pipeline.print_output()

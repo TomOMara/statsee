@@ -1,6 +1,6 @@
 from graph_cutter import *
 import cv2
-from helpers import expand_data_array
+from utilities import expand_data_array
 from math import floor
 
 class ImageJsonPair:
