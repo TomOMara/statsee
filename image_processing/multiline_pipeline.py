@@ -21,7 +21,8 @@ class MultilinePipeline:
     def run(self):
 
         if not self.image_json_pair:
-            raise ValueError("No input files")
+            # raise ValueError("No input files")
+            return -1, "No input files"
 
         if self.should_run_tests:
             doctest.testmod()
@@ -31,10 +32,14 @@ class MultilinePipeline:
             self.print_output()
             if self.should_save:
                 self.save()
+            return 1, None
         except NoCurvesFoundException as e:
-            return str(e)
-        except ValueError as e:
+            return -1, str(e)
+        except TypeError as e:
+            return -1, 'Image either not valid or lost.'
+        except Exception as e:
             print("Error: " + e.message + " couldn't complete " + self.image_json_pair.get_image_name())
+            return -1, e.message
 
     def save(self):
         json_name = self.image_json_pair.get_json_name()
@@ -214,7 +219,7 @@ if __name__ == '__main__':
                    'e_hard_one.png', 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
     # test_images = ['e_hard_one.png']# 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
     # test_images = ['black_and_white_grid_lines.png']
-    test_images = ['e_hard_five.png']
+    test_images = ['online_image.png']
     # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
     # pipeline.run()
     # pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('simple_demo_1.png', 'json/simple_demo_1.json'),
@@ -223,9 +228,9 @@ if __name__ == '__main__':
     for image in test_images:
         image_json_pair = ImageJsonPair('images/' + image, 'json/simple_demo_1.json')
         pipeline = MultilinePipeline(image_json_pair=image_json_pair,
-                                     parse_resolution=2,
+                                     parse_resolution=3,
                                      should_run_tests=False,
-                                     should_illustrate_steps=False,
+                                     should_illustrate_steps=True,
                                      should_save=True)
         pipeline.run()
         # pipeline.print_output()

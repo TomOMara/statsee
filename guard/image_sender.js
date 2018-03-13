@@ -28,8 +28,8 @@ function img_find() {
 }
 
 // This will verify likeyhood of image being a line graph
-function verify_images(){
-
+function verified_images(){
+    return img_find();
 }
 
 
@@ -38,21 +38,23 @@ function success(response){
     console.log(response);
 }
 
-function send_image_url_to_api(url){
+function send_verified_image_urls_to_api(){
 
     endpoint = 'http://127.0.0.1:5000/';
-
     method = 'POST';
 
-    $.ajax({
-        type: method,
-        url: endpoint,
-        data: url,
-        success: success,
-        dataType: 'html'
-    });
+    for (image_url in verified_images) {
 
+        $.ajax({
+            type: method,
+            url: endpoint,
+            data: image_url,
+            success: success,
+            dataType: 'html'
+        });
+
+    }
 }
 
-image_url = 'hi.com'
-send_image_url_to_api(image_url);
+
+// We have an image located at https://imagebin.ca/v/3ueIn2A8o5JJ
