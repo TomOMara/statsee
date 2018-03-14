@@ -200,7 +200,7 @@ def inject_line_data_into_file_with_name(file_name, dataset):
     # update x encodings
     json_data = update_scale(json=json_data, dataset=dataset)
 
-    with open('out/' + file_name, 'w+') as f:
+    with open(file_name, 'w+') as f:
         json.dump(json_data, f, sort_keys=True, indent=2, separators=(',', ':'))
 
 def update_scale(json, dataset):

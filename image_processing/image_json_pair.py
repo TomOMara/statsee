@@ -2,6 +2,8 @@ from graph_cutter import *
 import cv2
 from utilities import expand_data_array
 from math import floor
+import os.path
+
 
 class ImageJsonPair:
 
@@ -22,6 +24,9 @@ class ImageJsonPair:
 
     def get_image_name(self):
         return self.image_name
+
+    def get_json_directory(self):
+        return os.path.abspath(os.path.join(self.json_name, os.pardir))
 
     def get_image(self):
         return self.image
