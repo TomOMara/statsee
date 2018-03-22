@@ -10,7 +10,7 @@ api = Api(app)
 CORS(app)
 
 
-
+from DemoResource import DemoResource
 
 class StatseeAPI(Resource):
     """
@@ -99,6 +99,7 @@ class StatseeAPI(Resource):
 
 
 api.add_resource(StatseeAPI, '/')
+api.add_resource(DemoResource, '/demo_webpage')
 
 if __name__ == '__main__':
     app.run(debug=True)
