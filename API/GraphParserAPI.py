@@ -23,9 +23,9 @@ class GraphParserAPI(Resource):
         image_url = str(request.form['url'])
 
         # download image from external site here
-        image_data, image_path = self.ImageDownloader.download_image_from_url(image_url)
+        _, image_path = self.ImageDownloader.download_image_from_url(image_url)
 
-        if self.GraphVerifier.image_is_verified_as_a_line_graph(image_data):
+        if self.GraphVerifier.image_is_verified_as_a_line_graph(image_url):
             success, error_message = self.GraphParser.get_results_from_pipeline(image_path)
 
             if error_message:
