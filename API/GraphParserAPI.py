@@ -11,7 +11,7 @@ class GraphParserAPI(Resource):
         self.GraphVerifier = GraphVerifier.GraphVerifier()
         self.GraphParser = GraphParser.GraphParser()
         self.ImageDownloader = ImageDownloader.ImageDownloader()
-        
+
     def get(self):
         """
         Example Get request

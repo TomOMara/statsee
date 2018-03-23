@@ -3,7 +3,7 @@ from flask_restful import Resource, Api
 from flask_cors import CORS, cross_origin
 from flask import Response, render_template
 
-class DemoResource(Resource):
+class DemoResourceAPI(Resource):
 
     def get(self):
         """

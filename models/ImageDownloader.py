@@ -3,8 +3,7 @@ import requests
 
 class ImageDownloader(object):
 
-    @staticmethod
-    def download_image_from_url(url):
+    def download_image_from_url(self, url):
         """
         Downloads image into images/ and returns raw image data
         """

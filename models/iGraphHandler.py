@@ -1,7 +1,7 @@
 import subprocess
 
 
-class iGraphHandler:
+class iGraphHandler(object):
 
     def __init__(self):
         pass
