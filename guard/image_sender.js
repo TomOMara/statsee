@@ -1,5 +1,4 @@
 
-
 // Invoke Jquery straight aways
 (function() {
     // Load the script
@@ -11,48 +10,41 @@
         // Use $ here...
     };
     document.getElementsByTagName("head")[0].appendChild(script);
+    console.log('jquery loaded');
 })();
 
+function send_images_to_api(){
 
-// Grab all images on page
-// TODO: store the most local id of the image so we can dump api response back here
-function img_find() {
-    var imgs = document.getElementsByTagName("img");
-    var imgSrcs = [];
+    // loop over every image
+    $("img").each(function(idx) {
 
-    for (var i = 0; i < imgs.length; i++) {
-        imgSrcs.push(imgs[i].src);
-    }
+       // grab image source
+       img_src = $("img")[idx].src;
 
-    return imgSrcs;
-}
-
-// This will verify likeyhood of image being a line graph
-function verify_images(){
-
-}
-
-
-function success(response){
-    alert('success!');
-    console.log(response);
-}
-
-function send_image_url_to_api(url){
-
-    endpoint = 'http://127.0.0.1:5000/';
-
-    method = 'POST';
-
-    $.ajax({
-        type: method,
-        url: endpoint,
-        data: url,
-        success: success,
-        dataType: 'html'
+       // send the image to api
+       $.ajax({
+            type: method,
+            url: endpoint,
+            data: { 'url': img_src },
+            success: function(response)
+            {
+                // if successfull, append response as sibling
+                success_callback(response);
+                message = JSON.parse(response).message;
+                $("<p>" + message + "</p>").insertAfter($("img")[idx]);
+            },
+            dataType: 'html'
+        });
     });
-
 }
 
-image_url = 'hi.com'
-send_image_url_to_api(image_url);
+function success_callback(responseObj){
+    // Do something like read the response and show data
+    data = JSON.parse(responseObj);
+    alert('data = ' + data.data); // Only applicable to JSON response
+}
+
+(function() {
+    send_images_to_api();
+})();
+
