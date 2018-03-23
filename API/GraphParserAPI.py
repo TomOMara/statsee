@@ -38,7 +38,7 @@ class GraphParserAPI(Resource):
 
 
         # wasn't line graph
-        return self.respond_with(400, '', 'failed to parse graph')
+        return self.respond_with(400, '', 'image was not a graph')
 
 
     def respond_with(self, status, data, message):
