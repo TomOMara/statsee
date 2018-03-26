@@ -390,11 +390,52 @@ def handle_same_colour_lines_in_mask(in_mask, image_json_pair):
 def get_x_y_coord_list(x_labels, y_coords):
     x_y_coords = []
 
+    y_coords = fill_in_missing_values(y_coords)
+
     for x, y in zip(x_labels, y_coords):
         x_y_coords.append((x, y))
 
     return x_y_coords
 
+
+def fill_in_missing_values(arr):
+    for idx, val in enumerate(arr):
+        if val is None and idx != 0 and idx != len(arr) - 1:
+            arr = estimate_many_missing_values(idx, arr)
+
+    return arr
+
+def estimate_many_missing_values(idx, y_coords):
+    # first establish how many missing values we have starting from idx
+    missing_vals = 0
+    counter = idx
+    while y_coords[counter] is None:
+
+        missing_vals += 1
+        counter += 1
+        if counter == len(y_coords):
+            return y_coords
+
+    # get previous and next known values
+    prev_known_val = y_coords[idx - 1]
+    next_known_val = y_coords[counter]
+
+    # break if we wont be able to get delta
+    if prev_known_val is None or next_known_val is None:
+        return y_coords
+
+    # calculate value to add from a delta
+    delta_known_vals = next_known_val - prev_known_val
+    val_to_add = delta_known_vals / float(missing_vals + 1)
+
+    # update value in place
+    cntr = 0
+    while cntr < missing_vals:
+        y_coords[idx] = round(y_coords[idx - 1] + val_to_add, 2)
+        cntr += 1
+        idx += 1
+
+    return y_coords
 
 def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
     pixel_coords = []
