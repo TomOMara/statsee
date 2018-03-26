@@ -55,11 +55,13 @@ class ImageJsonPair:
 
     def get_x_axis_width(self):
         # TODO
-        return 813
+        # return 813
+        return self.image.shape[1] - 2
 
     def get_y_axis_pixel_height(self):
         # TODO
-        return 362
+        return self.image.shape[0] - 2
+        # return 362
 
     def get_y_axis_val_max(self):
         # TODO
