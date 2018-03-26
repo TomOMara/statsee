@@ -7,7 +7,6 @@ class GraphVerifierAPI(Resource):
 
     def __init__(self):
         self.graph_verifier = GraphVerifier.GraphVerifier()
-        self.ImageDownl
 
     def get(self):
         """

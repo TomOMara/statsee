@@ -35,6 +35,8 @@ class GraphParserAPI(Resource):
             # status, data, error_message = self.get_results_from_pipeline(image_path)
             if igraph_response:
                 return self.respond_with(200, igraph_response, 'No errors')
+            else:
+                return self.respond_with(400, '', 'error generating description with iGraph')
 
 
         # wasn't line graph
