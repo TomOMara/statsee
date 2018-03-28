@@ -402,7 +402,7 @@ def test_blank_graph():
     input = image('blank.png')
     pipe = pipeline(input)
     e = acceptable_error_rate(input)
-    assert pipe.run() == "'No curves found for image ../images/blank.png'"
+    assert pipe.run() == (-1, "'No curves found for image ../images/blank.png'")
 
 
 """
