@@ -8,7 +8,7 @@ from edge_detection import *
 from preprocessing import *
 from skimage import measure
 import numpy as np
-
+from TrendParser import TrendParser
 
 def expand_data_array(data_array, factor):
     """
@@ -81,37 +81,37 @@ def expand_data_array(data_array, factor):
     return expanded_array
 
 
-def format_dataset_to_dictionary(datasets):
+def format_curves_to_dictionary(datasets):
     """
 
     >>> dataset = [[('1', 3), ('2', 3), ('3', 3)], [('x', 4), ('y', 4), ('z', 4)]]
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     {'A': {'1': 3, '3': 3, '2': 3}, 'B': {'y': 4, 'x': 4, 'z': 4}}
 
     >>> dataset = [[('1', 3.791), ('2', 3.791), ('3', 3.791)]]
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     {'A': {'1': 3.791, '3': 3.791, '2': 3.791}}
 
     >>> dataset = ('1', 3.791)
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     Traceback (most recent call last):
         ...
     ValueError: dataset should be a list
 
     >>> dataset = [('1', 3.791)]
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     Traceback (most recent call last):
         ...
     ValueError: dataset curve should be a list
 
     >>> dataset = [['1']]
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     Traceback (most recent call last):
         ...
     ValueError: curve coordinate should be a tuple
 
     >>> dataset = []
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     Traceback (most recent call last):
         ...
     ValueError: dataset should not be empty
@@ -150,8 +150,6 @@ def format_dataset_to_dictionary(datasets):
 
         dataset_dict[possible_curve_keys.pop(0)] = curve_dict
 
-
-
     return dataset_dict
 
 def clear_tmp_on_run():
@@ -187,25 +185,27 @@ def array_is_3D(image):
     return len(image.shape) == 3
 
 
-def inject_line_data_into_file_with_name(file_name, dataset):
+def inject_line_data_into_file_with_name(image_json_pair, datasets):
     """
     Loads a json file and injects data into json file, along with error information
     """
-    with open(file_name) as f:
+    with open(image_json_pair.get_json_name()) as f:
         json_data = json.load(f)
 
+    trends = TrendParser(datasets, image_json_pair).parse_trends()
+
     # update series data
-    json_data.update({'series': dataset})
-
+    json_data.update({'series': datasets})
+    json_data.update({'trends': trends})
     # update x encodings
-    json_data = update_scale(json=json_data, dataset=dataset)
+    json_data = update_scale(json=json_data, datasets=datasets)
 
-    with open(file_name, 'w+') as f:
+    with open(image_json_pair.get_json_name(), 'w+') as f:
         json.dump(json_data, f, sort_keys=True, indent=2, separators=(',', ':'))
 
-def update_scale(json, dataset):
+def update_scale(json, datasets):
 
-    scale_values = sorted(dataset.values()[0].keys())
+    scale_values = sorted(datasets.values()[0].keys())
     new_json = json['encoding']['x']['scale']
 
     # update values
@@ -390,11 +390,52 @@ def handle_same_colour_lines_in_mask(in_mask, image_json_pair):
 def get_x_y_coord_list(x_labels, y_coords):
     x_y_coords = []
 
+    y_coords = fill_in_missing_values(y_coords)
+
     for x, y in zip(x_labels, y_coords):
         x_y_coords.append((x, y))
 
     return x_y_coords
 
+
+def fill_in_missing_values(arr):
+    for idx, val in enumerate(arr):
+        if val is None and idx != 0 and idx != len(arr) - 1:
+            arr = estimate_many_missing_values(idx, arr)
+
+    return arr
+
+def estimate_many_missing_values(idx, y_coords):
+    # first establish how many missing values we have starting from idx
+    missing_vals = 0
+    counter = idx
+    while y_coords[counter] is None:
+
+        missing_vals += 1
+        counter += 1
+        if counter == len(y_coords):
+            return y_coords
+
+    # get previous and next known values
+    prev_known_val = y_coords[idx - 1]
+    next_known_val = y_coords[counter]
+
+    # break if we wont be able to get delta
+    if prev_known_val is None or next_known_val is None:
+        return y_coords
+
+    # calculate value to add from a delta
+    delta_known_vals = next_known_val - prev_known_val
+    val_to_add = delta_known_vals / float(missing_vals + 1)
+
+    # update value in place
+    cntr = 0
+    while cntr < missing_vals:
+        y_coords[idx] = round(y_coords[idx - 1] + val_to_add, 2)
+        cntr += 1
+        idx += 1
+
+    return y_coords
 
 def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
     pixel_coords = []

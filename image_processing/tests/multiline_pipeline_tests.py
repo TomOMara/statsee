@@ -1,6 +1,6 @@
 import pytest
 from ..multiline_pipeline import *
-
+# from image_processing.multiline_pipeline import *
 """
     Test the output for a one line image is of the format expected
 """
@@ -9,14 +9,14 @@ from ..multiline_pipeline import *
 @pytest.fixture
 def pipeline(input_image):
     pipeline = MultilinePipeline(input_image,
-                                 parse_resolution=2,
+                                 parse_resolution=3,
                                  should_run_tests=False,
                                  should_illustrate_steps=False)
     return pipeline
 
 @pytest.fixture
 def image(image_name):
-    return ImageJsonPair('../images/' + image_name, '../out/json/simple_demo_1.json')
+    return ImageJsonPair('../images/' + image_name, '../out/json/simple_demo_1.json', '_')
 
 @pytest.fixture
 def number_of_curves_in(dataset):
@@ -56,7 +56,7 @@ def trend_of(curve, error_rate):
 
 @pytest.fixture
 def acceptable_error_rate(image):
-    return float(image.get_y_axis_val_max()) * 0.05
+    return float(image.get_y_axis_val_max()) * 0.03
 
 
 @pytest.fixture
@@ -315,7 +315,7 @@ def test_e_hard_five():
     curve_B = pipe.datasets['B']
     curve_C = pipe.datasets['C']
     curve_trends = [trend_of(curve, e) for curve in [curve_A, curve_B, curve_C]]
-    expected_trends = ["horizontal constant", "negative curve", "negative curve"]
+    expected_trends = [" constant", "negative curve", "negative curve"]
 
     assert sorted(curve_trends) == sorted(expected_trends)
     # assert curve_A != curve_B != curve_C
@@ -402,8 +402,11 @@ def test_blank_graph():
     input = image('blank.png')
     pipe = pipeline(input)
     e = acceptable_error_rate(input)
-    assert pipe.run() == "'No curves found for image ../images/blank.png'"
+    assert pipe.run() == (-1, "'No curves found for image ../images/blank.png'")
 
+
+if __name__ == '__main__':
+    test_image_with_black_and_white_grid_lines()
 
 """
     Test the output for a two line image is of the format expected

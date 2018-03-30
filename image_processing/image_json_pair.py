@@ -7,7 +7,7 @@ import os.path
 
 class ImageJsonPair:
 
-    def __init__(self, image_name, json_name):
+    def __init__(self, image_name, json_name, id):
 
         if not isinstance(image_name, str):
             raise TypeError('image_name must be a string')
@@ -18,6 +18,7 @@ class ImageJsonPair:
         self.json_name = json_name
         self.image_name = image_name
         self.image = cv2.imread(image_name)
+        self.id = id
         self.x_axis_labels = None
         self.is_continuous = True
         self.is_discrete = False # make discrete by default
@@ -55,11 +56,13 @@ class ImageJsonPair:
 
     def get_x_axis_width(self):
         # TODO
-        return 813
+        # return 813
+        return self.image.shape[1] - 2
 
     def get_y_axis_pixel_height(self):
         # TODO
-        return 362
+        return self.image.shape[0] - 2
+        # return 362
 
     def get_y_axis_val_max(self):
         # TODO

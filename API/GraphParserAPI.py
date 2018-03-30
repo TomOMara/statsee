@@ -23,10 +23,10 @@ class GraphParserAPI(Resource):
         image_url = str(request.form['url'])
 
         # download image from external site here
-        _, image_path = self.ImageDownloader.download_image_from_url(image_url)
+        _, image_path, image_id = self.ImageDownloader.download_image_from_url(image_url)
 
         if self.GraphVerifier.image_is_verified_as_a_line_graph(image_url):
-            success, error_message = self.GraphParser.get_results_from_pipeline(image_path)
+            success, error_message = self.GraphParser.get_results_from_pipeline(image_path, image_id)
 
             if error_message:
                 return self.respond_with(400, None, error_message)
@@ -35,6 +35,8 @@ class GraphParserAPI(Resource):
             # status, data, error_message = self.get_results_from_pipeline(image_path)
             if igraph_response:
                 return self.respond_with(200, igraph_response, 'No errors')
+            else:
+                return self.respond_with(400, '', 'error generating description with iGraph')
 
 
         # wasn't line graph
