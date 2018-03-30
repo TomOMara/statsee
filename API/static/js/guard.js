@@ -25,18 +25,19 @@ function send_images_to_api(){
     endpoint = 'http://127.0.0.1:5000/';
     method = 'POST';
 
+
     $("img").each(function(idx) {
-       img_src = $("img")[idx].src;
+       let img_src = $("img")[idx].src;
+       let current_index = idx;
        $.ajax({
            type: method,
            url: endpoint,
            data: { 'url': img_src },
            success: function(response)
            {
-               message = JSON.parse(response).message;
-               alert(img_src + message);
-               data = JSON.parse(response).data;
-               $("<p>" + data + "</p>").insertAfter($("img")[idx]);
+                message = JSON.parse(response).message;
+                data = JSON.parse(response).data;
+                $("<p>" + data + "</p>").insertAfter($("img")[idx]);
            },
            failure: function(f_response) {
                console.log('failed :(');
@@ -45,6 +46,7 @@ function send_images_to_api(){
         });
     });
 }
+
 
 document.addEventListener('DOMContentLoaded', function() {
     alert("Ready!");
