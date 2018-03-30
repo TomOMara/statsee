@@ -14,7 +14,7 @@ class GraphVerifier(object):
         """
         # load pre-existing NN instance here
         # NN.predict(image)
-        image_data, image_path = self.ImageDownloader.download_image_from_url(img_url)
+        image_data, image_path, _ = self.ImageDownloader.download_image_from_url(img_url)
 
         return self.Model.predict(self.ImageDownloader.image_path)
 

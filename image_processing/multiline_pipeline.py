@@ -226,7 +226,7 @@ if __name__ == '__main__':
     #                              parse_resolution=2, should_run_tests=False)
 
     for image in test_images:
-        image_json_pair = ImageJsonPair('images/' + image, 'json/simple_demo_1.json')
+        image_json_pair = ImageJsonPair('images/' + image, 'json/simple_demo_1.json', '___')
         pipeline = MultilinePipeline(image_json_pair=image_json_pair,
                                      parse_resolution=3,
                                      should_run_tests=False,
