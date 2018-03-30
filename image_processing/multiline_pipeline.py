@@ -42,8 +42,8 @@ class MultilinePipeline:
             return -1, e.message
 
     def save(self):
-        json_name = self.image_json_pair.get_json_name()
-        inject_line_data_into_file_with_name(json_name, self.datasets)
+        image_json_pair = self.image_json_pair
+        inject_line_data_into_file_with_name(image_json_pair, self.datasets)
 
     def print_output(self):
         if self.datasets is None:
@@ -60,25 +60,25 @@ class MultilinePipeline:
         TypeError: image_name must be a string
 
         """
-        datasets = []
+        curves = []
 
-        curves = self.split_curves()
+        binary_curves = self.split_image_into_binary_curves()
 
-        if not curves:
+        if not binary_curves:
             raise NoCurvesFoundException(self.image_json_pair.get_image_name())
 
-        for curve in curves:
-            dataset = self.get_datapoints_from_binary_curve(curve)
+        for binary_curve in binary_curves:
+            curve = self.get_datapoints_from_binary_curve(binary_curve)
 
-            if not dataset:
+            if not curve:
                 return []
 
-            datasets += dataset
+            curves += curve
 
-        dict = format_dataset_to_dictionary(datasets)
-        return dict
+        curves_as_dict = format_curves_to_dictionary(curves)
+        return curves_as_dict
 
-    def split_curves(self):
+    def split_image_into_binary_curves(self):
         """
 
         """

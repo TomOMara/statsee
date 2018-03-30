@@ -8,7 +8,7 @@ from edge_detection import *
 from preprocessing import *
 from skimage import measure
 import numpy as np
-
+from TrendParser import TrendParser
 
 def expand_data_array(data_array, factor):
     """
@@ -81,37 +81,37 @@ def expand_data_array(data_array, factor):
     return expanded_array
 
 
-def format_dataset_to_dictionary(datasets):
+def format_curves_to_dictionary(datasets):
     """
 
     >>> dataset = [[('1', 3), ('2', 3), ('3', 3)], [('x', 4), ('y', 4), ('z', 4)]]
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     {'A': {'1': 3, '3': 3, '2': 3}, 'B': {'y': 4, 'x': 4, 'z': 4}}
 
     >>> dataset = [[('1', 3.791), ('2', 3.791), ('3', 3.791)]]
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     {'A': {'1': 3.791, '3': 3.791, '2': 3.791}}
 
     >>> dataset = ('1', 3.791)
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     Traceback (most recent call last):
         ...
     ValueError: dataset should be a list
 
     >>> dataset = [('1', 3.791)]
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     Traceback (most recent call last):
         ...
     ValueError: dataset curve should be a list
 
     >>> dataset = [['1']]
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     Traceback (most recent call last):
         ...
     ValueError: curve coordinate should be a tuple
 
     >>> dataset = []
-    >>> format_dataset_to_dictionary(dataset)
+    >>> format_curves_to_dictionary(dataset)
     Traceback (most recent call last):
         ...
     ValueError: dataset should not be empty
@@ -150,8 +150,6 @@ def format_dataset_to_dictionary(datasets):
 
         dataset_dict[possible_curve_keys.pop(0)] = curve_dict
 
-
-
     return dataset_dict
 
 def clear_tmp_on_run():
@@ -187,25 +185,27 @@ def array_is_3D(image):
     return len(image.shape) == 3
 
 
-def inject_line_data_into_file_with_name(file_name, dataset):
+def inject_line_data_into_file_with_name(image_json_pair, datasets):
     """
     Loads a json file and injects data into json file, along with error information
     """
-    with open(file_name) as f:
+    with open(image_json_pair.get_json_name()) as f:
         json_data = json.load(f)
 
+    trends = TrendParser(datasets, image_json_pair).parse_trends()
+
     # update series data
-    json_data.update({'series': dataset})
-
+    json_data.update({'series': datasets})
+    json_data.update({'trends': trends})
     # update x encodings
-    json_data = update_scale(json=json_data, dataset=dataset)
+    json_data = update_scale(json=json_data, datasets=datasets)
 
-    with open(file_name, 'w+') as f:
+    with open(image_json_pair.get_json_name(), 'w+') as f:
         json.dump(json_data, f, sort_keys=True, indent=2, separators=(',', ':'))
 
-def update_scale(json, dataset):
+def update_scale(json, datasets):
 
-    scale_values = sorted(dataset.values()[0].keys())
+    scale_values = sorted(datasets.values()[0].keys())
     new_json = json['encoding']['x']['scale']
 
     # update values
