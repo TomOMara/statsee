@@ -66,7 +66,7 @@ class ImageJsonPair:
 
     def get_y_axis_val_max(self):
         # TODO
-        return 9
+        return 10
 
     def get_is_continuous(self):
         return self.is_continuous
