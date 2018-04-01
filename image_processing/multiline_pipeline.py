@@ -190,40 +190,10 @@ class MultilinePipeline:
 
         return cuts
 
-    def tests(self):
-
-        images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_three.png', 'simple_demo_4.png',
-                  'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
-                  'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png']
-
-        for image in images:
-            print(image + '\n')
-
-            try:
-                datasets = self.get_all_datasets_for_image_with_name('images/' + image)
-                print('datasets: ', datasets)
-            except ValueError as e:
-                print("Error: " + e.message + " couldn't complete " + image)
-
 
 if __name__ == '__main__':
 
-    # if should_run_tests:
-    #     clear_tmp_on_run()
-    #     tests()
-
-    test_images = ['simple_demo_1.png', 'simple_demo_2.png', 'simple_demo_3.png', 'simple_demo_4.png',
-                   'double_demo_one.png', 'double_demo_two.png', 'double_demo_three.png', 'double_demo_four.png',
-                   'hard_demo_one.png', 'hard_demo_two.png', 'hard_demo_three.png', 'hard_demo_four.png',
-                   'hard_demo_five.png',
-                   'e_hard_one.png', 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
-    # test_images = ['e_hard_one.png']# 'e_hard_three.png', 'e_hard_four.png', 'e_hard_five.png']
-    # test_images = ['black_and_white_grid_lines.png']
-    test_images = ['online_image.png']
-    # pipeline = MultilinePipeline(in_image_filenames=test_images, parse_resolution=2, should_run_tests=False)
-    # pipeline.run()
-    # pipeline = MultilinePipeline(image_json_pair=ImageJsonPair('simple_demo_1.png', 'json/simple_demo_1.json'),
-    #                              parse_resolution=2, should_run_tests=False)
+    test_images = ['e_hard_four.png']
 
     for image in test_images:
         image_json_pair = ImageJsonPair('images/' + image, 'json/simple_demo_1.json', '___')
