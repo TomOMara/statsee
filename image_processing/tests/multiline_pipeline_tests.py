@@ -56,7 +56,7 @@ def trend_of(curve, error_rate):
 
 @pytest.fixture
 def acceptable_error_rate(image):
-    return float(image.get_y_axis_val_max()) * 0.03
+    return float(image.get_y_axis_val_max()) * 0.02
 
 
 @pytest.fixture
@@ -315,7 +315,7 @@ def test_e_hard_five():
     curve_B = pipe.datasets['B']
     curve_C = pipe.datasets['C']
     curve_trends = [trend_of(curve, e) for curve in [curve_A, curve_B, curve_C]]
-    expected_trends = [" constant", "negative curve", "negative curve"]
+    expected_trends = ["horizontal constant", "negative curve", "negative curve"]
 
     assert sorted(curve_trends) == sorted(expected_trends)
     # assert curve_A != curve_B != curve_C
@@ -347,10 +347,10 @@ def test_image_with_black_and_white_grid_lines():
     assert curve_A != curve_B
 
 def test_colour_ranges_produce_correct_number_of_curves():
-    test_axis_labels = [x for x in range(5, 20)]
+    test_axis_labels = [x for x in range(3, 20)]
     for label in test_axis_labels:
         inp = image('many_coloured_curves_two.png')
-        inp.x_axis_labels = [str(x) for x in range(1, label)]
+        inp.x_axis_labels = [str(x) for x in range(0, label)]
         print("trying with labels: ", inp.x_axis_labels)
         e = acceptable_error_rate(inp)
         pipe = pipeline(input_image=inp)
