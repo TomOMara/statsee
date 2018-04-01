@@ -70,13 +70,25 @@ class MultilinePipeline:
         for binary_curve in binary_curves:
             curve = self.get_datapoints_from_binary_curve(binary_curve)
 
-            if not curve:
-                return []
+            if self.insufficient_datapoints(curve):
+                continue
 
             curves += curve
 
+        if not curves:
+            return []
+
         curves_as_dict = format_curves_to_dictionary(curves)
         return curves_as_dict
+
+    def insufficient_datapoints(self, curve):
+        if not curve:
+            return []
+
+        nones_in_curve = sum(x is None for x in [x[1] for x in curve[0]])
+        length_of_curve = len(curve[0])
+
+        return True if nones_in_curve > length_of_curve/2 else False
 
     def split_image_into_binary_curves(self):
         """
@@ -142,11 +154,6 @@ class MultilinePipeline:
         else:
             return self.image_json_pair.get_image()
 
-
-
-
-
-
     def get_datapoints_from_binary_curve(self, ccm):
         """ returns data points for any ccm """
         if self.image_json_pair.get_is_continuous():
@@ -203,4 +210,3 @@ if __name__ == '__main__':
                                      should_illustrate_steps=True,
                                      should_save=True)
         pipeline.run()
-        # pipeline.print_output()
