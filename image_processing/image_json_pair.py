@@ -47,7 +47,7 @@ class ImageJsonPair:
     def get_x_axis_labels(self):
         # TODO
         if not self.x_axis_labels:
-            self.x_axis_labels = [str(x) for x in range(1, 6)] # TODO: 6 is the minimum here. we will not always get that luxury. write test and fix.
+            self.x_axis_labels = [str(x) for x in range(0, 11)] # TODO: 6 is the minimum here. we will not always get that luxury. write test and fix.
 
         return self.x_axis_labels
 
@@ -66,7 +66,7 @@ class ImageJsonPair:
 
     def get_y_axis_val_max(self):
         # TODO
-        return 9
+        return 10
 
     def get_is_continuous(self):
         return self.is_continuous
