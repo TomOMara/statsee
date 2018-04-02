@@ -200,7 +200,7 @@ class MultilinePipeline:
 
 if __name__ == '__main__':
 
-    test_images = ['e_hard_four.png']
+    test_images = ['hardest_dashes.png']
 
     for image in test_images:
         image_json_pair = ImageJsonPair('images/' + image, 'json/simple_demo_1.json', '___')

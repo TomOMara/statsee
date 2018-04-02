@@ -66,8 +66,8 @@ class TrendParser(object):
 
     def trend_shape(self, curve):
         deltas = self.calculate_deltas(curve.y_values)
-        if self.each_value_is_the_same(deltas):
-            return "line"
+        if self.each_delta_is_the_same(deltas):
+            return "flat line"
         times_sign_changed = self.get_number_of_sign_changes(deltas)
 
         # if we have between 0 and 1 call it a curve
@@ -99,7 +99,7 @@ class TrendParser(object):
         return "+" if self.is_positive(num) else "-"
 
     def acceptable_error_rate(self, image_json_pair):
-        return float(image_json_pair.get_y_axis_val_max()) * 0.05
+        return float(image_json_pair.get_y_axis_val_max()) * 0.02
 
     def each_value_is_the_same(self, arr_of_values):
         if len(set(arr_of_values)) <= 2 and None not in set(arr_of_values):
