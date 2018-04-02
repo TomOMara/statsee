@@ -138,21 +138,23 @@ class MultilinePipeline:
     def remove_image_grid_lines(self):
         """
 
-        :return: True or False
+        :return: image without gridlines
         """
-
-        # take a cut of the image, somewhere the middle.
-        middle_cut = get_coloured_cuts_for_image(self.image_json_pair.get_image(),
-                                                 self.image_json_pair.get_middle_label_position())
-
-        threshold = 3
-
         # if number of edges found in the cut over some threshold? i.e 5
-        if get_number_of_edges_in_cuts(middle_cut) > threshold:
-            return filter_out_most_common_colour_from_cut_and_return_image(middle_cut, self.image_json_pair)
+        if self.image_has_grid_lines(self.image_json_pair):
+            return filter_out_most_common_colour_from_cut_and_return_image(self.middle_cut(),
+                                                                           self.image_json_pair)
         # otherwise, probably no grid lines, dont alter the image
-        else:
-            return self.image_json_pair.get_image()
+        return self.image_json_pair.get_image()
+
+    def image_has_grid_lines(self, image_json_pair):
+        threshold = 5
+        # if number of edges found in the cut over some threshold? i.e 5
+        return get_number_of_edges_in_cuts(self.middle_cut()) > threshold
+
+    def middle_cut(self):
+        return get_coloured_cuts_for_image(self.image_json_pair.get_image(),
+                                           self.image_json_pair.get_middle_label_position())
 
     def get_datapoints_from_binary_curve(self, ccm):
         """ returns data points for any ccm """
