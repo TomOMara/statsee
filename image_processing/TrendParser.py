@@ -82,15 +82,23 @@ class TrendParser(object):
         if 4 <= times_sign_changed:
             return "wave"
 
-    def get_number_of_sign_changes(self, deltas):
+    def times_changed(self, deltas):
         times_changed = 0
-        current_sign = self.get_sign(deltas[0])
 
-        for delta in deltas:
-            if self.get_sign(delta) is not current_sign:
+        for idx, delta in enumerate(deltas):
+
+            # Stop if we're at the end
+            if idx == len(deltas) - 1:
+                break
+
+            current_delta = deltas[idx]
+            next_delta = deltas[idx + 1]
+
+            if self.get_sign(next_delta) != self.get_sign(current_delta):
                 times_changed += 1
 
         return times_changed
+
 
     def is_positive(self, num):
         return True if num >= 0 else False
