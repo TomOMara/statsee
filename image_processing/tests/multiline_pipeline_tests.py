@@ -327,7 +327,7 @@ def test_image_with_black_and_white_grid_lines():
 
     assert curve_A != curve_B
 
-def test_colour_ranges_produce_correct_number_of_curves():
+def test_range_of_x_axis_labels():
     test_axis_labels = [x for x in range(3, 20)]
     for label in test_axis_labels:
         inp = image('many_coloured_curves_two.png')
@@ -393,8 +393,9 @@ def test_similar_results_for_continuous_and_discrete_parsing():
 def test_blank_graph():
     input = image('blank.png')
     pipe = pipeline(input)
-    e = acceptable_error_rate(input)
     assert pipe.run() == (-1, "'No curves found for image ../images/blank.png'")
+
+
 
 
 if __name__ == '__main__':
