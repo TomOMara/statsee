@@ -13,8 +13,8 @@ class Curve(object):
 
         self.deltas = None
         self.values = {x: y for x, y in self.dataset.iteritems()}
-        self.x_values = [x for x, y in self.dataset.iteritems()]
-        self.y_values = [y for x, y in self.dataset.iteritems()]
+        self.x_values = [x for x, y in sorted(self.dataset.iteritems())]
+        self.y_values = [y for x, y in sorted(self.dataset.iteritems())]
         self.first_value = next((i for i in self.y_values if i is not None), None)
         self.last_value = next((i for i in reversed(self.y_values) if i is not None), None)
 
