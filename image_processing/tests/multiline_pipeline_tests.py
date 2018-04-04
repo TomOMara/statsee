@@ -306,11 +306,19 @@ def test_image_with_grid_lines():
 
     assert curve_A != curve_B
 
+def test_crossing_dashed_parabolas():
+    # will not pass, uncomment asserts when ready to fix
+    pipe, e = run_pipe_with_image('parabolas.png')
+
+    # assert number_of_curves_in(pipe.datasets) == 2
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    # assert curve_A != curve_B
+
+
 def test_image_with_black_and_white_grid_lines():
-    input = image('black_and_white_grid_lines.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('black_and_white_grid_lines.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
