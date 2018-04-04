@@ -24,6 +24,9 @@ def connect_dashes(probable_dashes, cc_matrix):
 
         else:
             index += 1
+            if index >= len(points):
+                raise Exception("crossing dashed lines?")
+
 
     return cc_matrix
 
