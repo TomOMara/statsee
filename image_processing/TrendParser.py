@@ -28,10 +28,10 @@ class TrendParser(object):
 
     def trend_of(self, curve):
 
-        result = "The line is shaped like a " + self.trend_shape(curve) + " and is " + self.trend_adjective(curve) +\
+        trend = "The line is shaped like a " + self.trend_shape(curve) + " and is " + self.trend_adjective(curve) +\
                  self.trend_direction(curve)
 
-        return result
+        return trend
 
     def trend_pattern(self, curve):
         """
@@ -50,28 +50,38 @@ class TrendParser(object):
             return "horizontal"
 
     def trend_adjective(self, curve):
-        if self.each_value_is_the_same([curve.first_value, curve.last_value]):
+        if curve.first_value == curve.last_value:
             return ""
 
 
-        LARGE_CHANGE_FACTOR = 5
+        LARGE_CHANGE_FACTOR = 5**2
         SMALL_CHANGE_FACTOR = 0
 
         delta = self.calculate_deltas([curve.first_value, curve.last_value])[0] ** 2
 
         if delta > LARGE_CHANGE_FACTOR:
-            return "steeply"
+            return "steeply "
         if SMALL_CHANGE_FACTOR < delta <= LARGE_CHANGE_FACTOR:
-            return "steadily"
+            return "steadily "
 
     def trend_shape(self, curve):
+
+        if self.each_delta_is_the_same(curve.y_values):
+            return "straight line"
+
         deltas = self.calculate_deltas(curve.y_values)
-        if self.each_delta_is_the_same(deltas):
-            return "flat line"
-        times_sign_changed = self.get_number_of_sign_changes(deltas)
+        times_sign_changed = self.times_changed(deltas)
 
         # if we have between 0 and 1 call it a curve
-        if 0 <= times_sign_changed <= 1:
+        if times_sign_changed == 0:
+
+            if self.is_positive(deltas[1]):
+                return "upward ramp"
+            else:
+                return "downward ramp"
+
+
+        if times_sign_changed == 1:
             return "curve"
 
         # if we have between 2 and 4 call it a jagged line
