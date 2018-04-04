@@ -66,6 +66,13 @@ def each_value_is_the_same(arr_of_values):
     else:
         return False
 
+@pytest.fixture
+def run_pipe_with_image(image_name):
+    input = image(image_name)
+    pipe = pipeline(input)
+    e = acceptable_error_rate(input)
+    pipe.run()
+    return pipe, e
 
 def deltas(arr):
     return [arr[idx + 1] - arr[idx] for idx in range(len(arr) - 1) if arr[idx+1] and arr[idx] is not None]
@@ -88,48 +95,38 @@ def each_delta_is_the_same(arr_of_values, acceptable_error_rate):
 
 
 def test_simple_demo_one():
-    input = image('simple_demo_1.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('simple_demo_1.png')
+
     assert number_of_curves_in(pipe.datasets) == 1
     curve = pipe.datasets['A']
     assert trend_of(curve, e) == "horizontal constant"
 
 def test_simple_demo_two():
-    input = image('simple_demo_2.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('simple_demo_2.png')
+
     assert number_of_curves_in(pipe.datasets) == 1
     curve = pipe.datasets['A']
     assert trend_of(curve, e) == "positive constant"
 
 
 def test_simple_demo_three():
-    input = image('simple_demo_3.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('simple_demo_3.png')
+
     assert number_of_curves_in(pipe.datasets) == 1
     curve = pipe.datasets['A']
     assert trend_of(curve, e) == "negative constant"
 
 
 def test_simple_demo_four():
-    input = image('simple_demo_4.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('simple_demo_4.png')
+
     assert number_of_curves_in(pipe.datasets) == 1
     curve = pipe.datasets['A']
     assert trend_of(curve, e) == "horizontal constant"
 
 def test_double_demo_one():
-    input = image('double_demo_one.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('double_demo_one.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -139,10 +136,8 @@ def test_double_demo_one():
 
 
 def test_double_demo_two():
-    input = image('double_demo_two.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('double_demo_two.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -152,10 +147,8 @@ def test_double_demo_two():
 
 
 def test_double_demo_three():
-    input = image('double_demo_three.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('double_demo_three.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -164,10 +157,8 @@ def test_double_demo_three():
     assert curve_A != curve_B
 
 def test_double_demo_four():
-    input = image('double_demo_four.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('double_demo_four.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -177,10 +168,8 @@ def test_double_demo_four():
 
 
 def test_hard_demo_one():
-    input = image('hard_demo_one.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('hard_demo_one.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -208,10 +197,8 @@ def test_hard_demo_one():
 #     assert curve_A != curve_B
 #
 def test_hard_demo_three_one():
-    input = image('hard_demo_three.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('hard_demo_three.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -220,10 +207,8 @@ def test_hard_demo_three_one():
     assert curve_A != curve_B
 
 def test_hard_demo_three_two():
-    input = image('hard_demo_three_2.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('hard_demo_three_2.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -253,10 +238,8 @@ def test_hard_demo_three_two():
 
 
 def test_e_hard_one():
-    input = image('e_hard_one.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('e_hard_one.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -267,10 +250,8 @@ def test_e_hard_one():
 
 
 def test_e_hard_two():
-    input = image('e_hard_two.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('e_hard_two.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -280,10 +261,8 @@ def test_e_hard_two():
     assert curve_A != curve_B
 
 def test_e_hard_three():
-    input = image('e_hard_three.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('e_hard_three.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -293,10 +272,8 @@ def test_e_hard_three():
     assert curve_A != curve_B
 
 def test_e_hard_four():
-    input = image('e_hard_four.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('e_hard_four.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -306,10 +283,8 @@ def test_e_hard_four():
     assert curve_A != curve_B
 
 def test_e_hard_five():
-    input = image('e_hard_five.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('e_hard_five.png')
+
     assert number_of_curves_in(pipe.datasets) == 3
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
@@ -321,10 +296,8 @@ def test_e_hard_five():
     # assert curve_A != curve_B != curve_C
 
 def test_image_with_grid_lines():
-    input = image('background_lines.png')
-    pipe = pipeline(input)
-    e = acceptable_error_rate(input)
-    pipe.run()
+    pipe, e = run_pipe_with_image('background_lines.png')
+
     assert number_of_curves_in(pipe.datasets) == 2
     curve_A = pipe.datasets['A']
     curve_B = pipe.datasets['B']
