@@ -202,13 +202,36 @@ class MultilinePipeline:
 
 if __name__ == '__main__':
 
-    test_images = ['hardest_dashes.png']
+    test_images = ['hard_demo_one.png']
 
     for image in test_images:
         image_json_pair = ImageJsonPair('images/' + image, 'json/simple_demo_1.json', '___')
         pipeline = MultilinePipeline(image_json_pair=image_json_pair,
-                                     parse_resolution=3,
+                                     parse_resolution=1,
                                      should_run_tests=False,
-                                     should_illustrate_steps=True,
+                                     should_illustrate_steps=False,
                                      should_save=True)
         pipeline.run()
+
+
+
+    # import time
+    #
+    # parse_resolution_ranges = [x for x in range(1, 100)]
+    # diffs = []
+    # for range in parse_resolution_ranges:
+    #     # print range
+    #     start = time.clock()
+    #
+    #     image_json_pair = ImageJsonPair('images/' + test_images[0], 'json/simple_demo_1.json', '___')
+    #     pipeline = MultilinePipeline(image_json_pair=image_json_pair,
+    #                                      parse_resolution=range,
+    #                                      should_run_tests=False,
+    #                                      should_illustrate_steps=False,
+    #                                      should_save=True)
+    #     pipeline.run()
+    #
+    #     end = time.clock()
+    #     diff = end - start
+    #     diffs.append( diff )
+    #     print diffs
