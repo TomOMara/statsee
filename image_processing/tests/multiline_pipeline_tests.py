@@ -367,6 +367,17 @@ def test_colour_ranges_produce_correct_number_of_curves():
         assert trend_of(curve_C, e) == "negative constant"
         assert trend_of(curve_D, e) == "negative constant"
 
+def test_multiple_colour_ranges():
+    pipe, e = run_pipe_with_image('many_coloured_curves_two.png')
+
+    assert number_of_curves_in(pipe.datasets) == 4
+    curve_A = pipe.datasets['A']
+    curve_B = pipe.datasets['B']
+    curve_C = pipe.datasets['C']
+    curve_D = pipe.datasets['D']
+    curve_trends = [trend_of(curve, e) for curve in [curve_A, curve_B, curve_C, curve_D]]
+    expected_trends = ["negative constant", "negative constant",
+                        "negative constant", "negative constant"]
 
 def test_similar_results_for_continuous_and_discrete_parsing():
     # test e hard one as this is where we have had the regression
