@@ -3,10 +3,53 @@ This document describes a design decision made on 7/02/2018
 Consider graph A has six labels on its x axis, "0", "1", "2", "3", "4", "5"
 Consider graph A has a width of 100px
 
-With that information, now consider getting the exact x value for a given label, say "2", for both a discrete and continuous graph.
+With that information, now consider getting the exact x value for a given label,
+say "2", for both a discrete and continuous graph.
 
-Assuming the graph is counting from 0, there would be a label every 20px, i.e. 0:0px, 1:20px, 2:40px, 3:60px, 4:80px, 5:100px. Therefore we could say the label 2 is 20px along the x axis.
+Assuming the graph is counting from 0, there would be a label every 20px,
+ i.e. 0:0px, 1:20px, 2:40px, 3:60px, 4:80px, 5:100px. Therefore we could say
+  the label 2 is 20px along the x axis.
 
-Now consider graph B which has five labels, "1", "2", "3", "4", "5" and is 100px accross. It is now impossible to know exactly how far along in px the label "2" appears on the x axis, as we have no anchor point 0 to start from. The graph could implicitly start from zero, or start from one with a 10px gap. but assuming either is these will lead to errors in the opposing case.
+Now consider graph B which has five labels, "1", "2", "3", "4", "5" and
+is 100px accross. It is now impossible to know exactly how far along in
+px the label "2" appears on the x axis, as we have no anchor point 0 to
+start from. The graph could implicitly start from zero, or start from one
+with a 10px gap. but assuming either is these will lead to errors in the
+opposing case.
 
-Because of this, we now adjust the x coordinates of cuts for labels which dont start at 0. The adjustment takes the cut between the middle of the x position of a centered and uncentered label. e.g assuming distance between labels is 100px, for a graph whose first label is at 100px, whose labels are non centered, the first cut would be at 75px. for a graph whose first label is at 50px because labels are centered, we take the cut at 75px also.
+Because of this, we now adjust the x coordinates of cuts for labels which
+dont start at 0. The adjustment takes the cut between the middle of the
+x position of a centered and uncentered label. e.g assuming distance between
+labels is 100px, for a graph whose first label is at 100px, whose labels
+are non centered, the first cut would be at 75px. for a graph whose first
+label is at 50px because labels are centered, we take the cut at 75px also.
+
+
+----------------------------------------------------------------------------
+
+There is a better way to do this.
+
+take a cut from left most pixel as well as the right most pixel
+
+as long as the cut is empty, there is a margin/gap to the left and right of the line series:
+for every empty cut, the margin is a pixel wider.
+
+margins roughly 3-6% of graph width each. i.e left margin is 3% of width, right is right margin
+
+having no margins means first and last label are sitting at 0px and len(axis)px,
+so calculations need not be adjusted
+
+having margins means the labels are centered in some way.
+    distance_between_categorys = number of categories / plot width in pixels.
+    first_category_position_starts_at = distance_between_categories/2
+
+
+
+
+
+
+https://www.google.co.uk/search?q=line+graph&rlz=1C5CHFA_enGB750GB750&source=lnms&tbm=isch&sa=X&ved=0ahUKEwium6uexqbaAhWGZVAKHUURCSkQ_AUICigB&biw=1920&bih=1080&dpr=1#imgrc=knt2unDGHGuJbM:
+https://www.google.co.uk/search?q=line+graph&rlz=1C5CHFA_enGB750GB750&source=lnms&tbm=isch&sa=X&ved=0ahUKEwium6uexqbaAhWGZVAKHUURCSkQ_AUICigB&biw=1920&bih=1080&dpr=1#imgdii=Co7odjbP_dso7M:&imgrc=knt2unDGHGuJbM:
+https://www.google.co.uk/search?q=line+graph&rlz=1C5CHFA_enGB750GB750&source=lnms&tbm=isch&sa=X&ved=0ahUKEwium6uexqbaAhWGZVAKHUURCSkQ_AUICigB&biw=1920&bih=1080&dpr=1#imgrc=uBjggxJh4GarnM:
+
+
