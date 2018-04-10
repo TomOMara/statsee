@@ -1,34 +1,132 @@
 {
-  "width": 994,
-  "height": 570,
-  "title": "F Score Noun frequencies",
-  "chart_type": "LineGraph",
-  "mark": "line",
-  "encoding": {
-    "x": {
-      "field": "Noun Frequency",
-      "type": "quantitative",
-      "axis": { "title": "Noun Frequency" },
-      "scale": {
-        "type": "log",
-        "labels": [ "10", "100", "1000", "10000", "100000", "1e+06" ],
-        "values": [ 10, 100, 1000, 10000, 100000, 1000000 ],
-        "domain": [ 10, 1000000 ],
-        "range": [ 231, 844 ]
-      }
+  "chart_type":"LineGraph",
+  "encoding":{
+    "x":{
+      "axis":{
+        "title":"Noun Frequency"
+      },
+      "field":"Noun Frequency",
+      "scale":{
+        "domain":[
+          0.0,
+          10.0
+        ],
+        "labels":[
+          "0.0",
+          "1.0",
+          "2.0",
+          "3.0",
+          "4.0",
+          "5.0",
+          "6.0",
+          "7.0",
+          "8.0",
+          "9.0",
+          "10.0"
+        ],
+        "range":[
+          231,
+          844
+        ],
+        "type":"linear",
+        "values":[
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0,
+          7.0,
+          8.0,
+          9.0,
+          10.0
+        ]
+      },
+      "type":"quantitative"
     },
-    "y": {
-      "field": "F-score",
-      "type": "quantitative",
-      "axis": { "title": "F-Score" },
-      "scale": {
-        "type": "linear",
-        "labels": [ "0", "0.1", "...", "0.8", "0.9" ],
-        "values": [ 0, 0.1, 0.2, "...", 0.8, 0.9 ],
-        "domain": [ 0, 0.9 ],
-        "range": [ 464, 20 ]
-      }
+    "y":{
+      "axis":{
+        "title":"F-Score"
+      },
+      "field":"F-score",
+      "scale":{
+        "domain":[
+          0,
+          0.9
+        ],
+        "labels":[
+          "0",
+          "0.1",
+          "...",
+          "0.8",
+          "0.9"
+        ],
+        "range":[
+          464,
+          20
+        ],
+        "type":"linear",
+        "values":[
+          0,
+          0.1,
+          0.2,
+          "...",
+          0.8,
+          0.9
+        ]
+      },
+      "type":"quantitative"
     }
-  }
+  },
+  "height":570,
+  "mark":"line",
+  "series":{
+    "A":{
+      "0.0":null,
+      "1.0":null,
+      "2.0":5.63,
+      "3.0":5.63,
+      "4.0":5.63,
+      "5.0":5.63,
+      "6.0":5.63,
+      "7.0":5.63,
+      "8.0":5.63,
+      "9.0":5.63,
+      "10.0":null
+    },
+    "B":{
+      "0.0":null,
+      "1.0":null,
+      "2.0":7.98,
+      "3.0":7.76,
+      "4.0":7.3,
+      "5.0":6.2,
+      "6.0":4.48,
+      "7.0":3.99,
+      "8.0":3.69,
+      "9.0":null,
+      "10.0":null
+    },
+    "C":{
+      "0.0":null,
+      "1.0":null,
+      "2.0":5.19,
+      "3.0":5.0,
+      "4.0":4.54,
+      "5.0":3.47,
+      "6.0":1.72,
+      "7.0":1.2,
+      "8.0":0.93,
+      "9.0":null,
+      "10.0":null
+    }
+  },
+  "title":"F Score Noun frequencies",
+  "trends":{
+    "A":"The line is shaped like a straight line and is horizontal where it starts at 5.63, where it finally then continues to 5.63.",
+    "B":"The line is shaped like a downward ramp and is steadily falling where it starts at 7.98, then falls steadily to 6.2, then falls steeply to 4.48, where it finally then falls steadily to 3.69.",
+    "C":"The line is shaped like a downward ramp and is steadily falling where it starts at 5.19, then falls steadily to 3.47, then falls steeply to 1.72, where it finally then falls steadily to 0.93."
+  },
+  "width":994
 }
-
