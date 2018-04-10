@@ -459,7 +459,7 @@ def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
             y_coords.append(None)
             continue
         y_value = y_val_max - (coord * units_per_pixel)
-        y_coords.append(round(y_value, 2))
+        y_coords.append(round(y_value, 1))
 
     return y_coords
 

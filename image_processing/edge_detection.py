@@ -342,5 +342,6 @@ def get_index_range_of_current_edge(cut, start):
 
     while current_is_edge(cut[end], is_coloured=is_coloured):
         end += 1
-
-    return (start, end-1)
+        if end == len(cut):
+            break
+    return (start, end)

@@ -39,7 +39,7 @@ def get_averaged_x_label_anchors(x_width, x_labels):
         if int(first_label) == 0:
             return get_unadjusted_x_label_anchors(x_width, x_labels)
         else:
-            return get_adjusted_x_label_anchors(x_width, x_labels)
+            return get_unadjusted_x_label_anchors(x_width, x_labels)
     except ValueError as e:
         return get_adjusted_x_label_anchors(x_width, x_labels)
 
@@ -58,9 +58,8 @@ def get_adjusted_x_label_anchors(x_width, x_labels):
     # add 0 which is ommited from graph
     unadjusted_label_positions = get_unadjusted_x_label_anchors(x_width, ["0"] + x_labels)
     pixel_distance_between_labels = x_width/len(x_labels)
-    adjustment_factor = 0.25 * pixel_distance_between_labels
+    adjustment_factor = 0 * pixel_distance_between_labels
     return [x-int(adjustment_factor) for x in unadjusted_label_positions if x != 0]
-
 
 def get_unadjusted_x_label_anchors(x_width, x_labels):
     """

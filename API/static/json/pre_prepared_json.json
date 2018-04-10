@@ -224,9 +224,9 @@
   },
   "title":"FTSE Stock Price Index",
   "trends":{
-    "Google":"The line is shaped like a line and is horizontal",
-    "Facebook":"The line is shaped like a wave and is falling",
-    "McDonalds":"The line is shaped like a wave and is falling"
+    "Google":"The line is shaped like a straight line and is horizontal where it starts at 6.3, where it finally then continues to 6.3.",
+    "Facebook":"The line is shaped like a curvy line and is steeply falling where it starts at 8.5, then continues to 8.5, then falls steadily to 8.4, then continues to 8.4, then falls steadily to 4.1, where it finally then continues to 4.1.",
+    "McDonalds":"The line is shaped like a wave and is steeply falling where it starts at 5.6, then continues to 5.6, then falls steadily to 5.4, then continues to 5.4, then falls steadily to 1.4, then continues to 1.4, then falls steadily to 1.2, where it finally then continues to 1.2."
   },
   "width":994
 }

@@ -45,7 +45,9 @@ function send_images_to_api(){
            success: function(response)
            {
                 message = JSON.parse(response).message;
-                console.log(img_src + message);
+                status = JSON.parse(response).status;
+                console.log(img_src + message + status);
+
                 data = JSON.parse(response).data;
                 if (data) {
                      $("<div class=\"alert alert-success\" role=\"alert\" style='margin: auto'>\n<p>" + data + "</p></div>").insertAfter($("img")[idx]);
