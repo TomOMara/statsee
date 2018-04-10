@@ -56,7 +56,10 @@ def trend_of(curve, error_rate):
 
 @pytest.fixture
 def acceptable_error_rate(image):
-    return float(image.get_y_axis_val_max()) * 0.02
+    # return float(image.get_y_axis_val_max()) * 0.02
+    # return float(image.get_y_axis_pixel_height()) * 0.008
+    return 0.2
+
 
 
 @pytest.fixture
@@ -90,7 +93,7 @@ def each_delta_is_the_same(arr_of_values, acceptable_error_rate):
     delts = deltas(arr_of_values)
     each_value_is_the_same = all(delts[0]**2 - acceptable_error_rate**2 <= x**2 <= delts[0]**2 + acceptable_error_rate**2 for x in delts)
 
-    print 'each delta is the same: ', each_value_is_the_same
+    print 'each delta is the same: ', each_value_is_the_same, 'based on acceptable error of ', acceptable_error_rate
     return each_value_is_the_same
 
 
