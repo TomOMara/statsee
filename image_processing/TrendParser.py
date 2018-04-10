@@ -1,5 +1,5 @@
 from Curve import Curve
-
+from TrendTracer import TrendTracer
 
 class TrendParser(object):
 
@@ -27,10 +27,11 @@ class TrendParser(object):
 
 
     def trend_of(self, curve):
+        tracer = TrendTracer(curve.y_values, self.times_changed(curve))
+        trace = tracer.build_trend_trace()
 
         trend = "The line is shaped like a " + self.trend_shape(curve) + " and is " + self.trend_adjective(curve) +\
-                 self.trend_direction(curve)
-
+                 self.trend_direction(curve) + trace
         return trend
 
     def trend_pattern(self, curve):
@@ -54,7 +55,7 @@ class TrendParser(object):
             return ""
 
 
-        LARGE_CHANGE_FACTOR = 5**2
+        LARGE_CHANGE_FACTOR = 1
         SMALL_CHANGE_FACTOR = 0
 
         delta = self.calculate_deltas([curve.first_value, curve.last_value])[0] ** 2
@@ -70,7 +71,7 @@ class TrendParser(object):
             return "straight line"
 
         deltas = self.calculate_deltas(curve.y_values)
-        times_sign_changed = self.times_changed(deltas)
+        times_sign_changed = self.times_changed(curve)
 
         # if we have between 0 and 1 call it a curve
         if times_sign_changed == 0:
@@ -92,7 +93,8 @@ class TrendParser(object):
         if 4 <= times_sign_changed:
             return "wave"
 
-    def times_changed(self, deltas):
+    def times_changed(self, curve):
+        deltas = self.calculate_deltas(curve.y_values)
         times_changed = 0
 
         for idx, delta in enumerate(deltas):
