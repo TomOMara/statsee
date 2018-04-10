@@ -58,7 +58,7 @@ def trend_of(curve, error_rate):
 def acceptable_error_rate(image):
     # return float(image.get_y_axis_val_max()) * 0.02
     # return float(image.get_y_axis_pixel_height()) * 0.008
-    return 0.2
+    return 0.27
 
 
 
