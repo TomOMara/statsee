@@ -36,11 +36,11 @@ class GraphParserAPI(Resource):
             if igraph_response:
                 return self.respond_with(200, igraph_response, 'No errors')
             else:
-                return self.respond_with(400, '', 'error generating description with iGraph')
+                return self.respond_with(501, None, 'error generating description with iGraph')
 
 
         # wasn't line graph
-        return self.respond_with(400, '', 'image was not a graph')
+        return self.respond_with(400, None, 'image was not a line graph')
 
 
     def respond_with(self, status, data, message):
