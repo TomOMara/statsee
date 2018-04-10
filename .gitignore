@@ -114,3 +114,8 @@ venv.bak/
 image_processing/scratchpad.py
 .pytest_cache/v/cache/lastfailed
 image_processing/tests/.pytest_cache/v/cache/lastfailed
+image_processing/same_coloured_split_binary_1.png
+image_processing/out/
+image_processing/images/
+image_processing/json/
+out/
