@@ -32,6 +32,7 @@ class TrendParser(object):
 
         trend = "The line is shaped like a " + self.trend_shape(curve) + " and is " + self.trend_adjective(curve) +\
                  self.trend_direction(curve) + trace
+        print(trend)
         return trend
 
     def trend_pattern(self, curve):
@@ -89,9 +90,15 @@ class TrendParser(object):
         if 2 <= times_sign_changed <= 4:
             return "curvy line"
 
-        # if we have more than 4 sign changes call it a wave
+        # wrooong.
+        # this should have an alternating delta pattern -> wave
         if 4 <= times_sign_changed:
             return "wave"
+
+        # can we detect jagged vs smooth?
+
+
+
 
     def times_changed(self, curve):
         deltas = self.calculate_deltas(curve.y_values)
