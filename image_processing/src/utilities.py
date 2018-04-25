@@ -2,7 +2,6 @@ import cv2
 import json
 from graph_cutter import get_averaged_x_label_anchors
 from dash_connector import connect_dashes
-from json_parser import *
 import numpy as np
 from edge_detection import *
 from preprocessing import *
