@@ -1,5 +1,7 @@
 import pytest
-from ..multiline_pipeline import *
+
+from image_processing.src.multiline_pipeline import *
+
 
 @pytest.fixture
 def pipeline(input_image):
