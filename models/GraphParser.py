@@ -1,8 +1,10 @@
-from image_processing.image_json_pair import ImageJsonPair
-from image_processing.multiline_pipeline import MultilinePipeline
-import uuid
 import shutil
+
+from image_processing.src.image_json_pair import ImageJsonPair
+from image_processing.src.multiline_pipeline import MultilinePipeline
 from paths import *
+
+
 class GraphParser(object):
 
     def __init__(self):

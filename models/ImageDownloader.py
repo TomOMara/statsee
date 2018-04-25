@@ -16,9 +16,9 @@ class ImageDownloader(object):
         image_data = requests.get(url).content
         file_type = url.rsplit('.', 1)[-1]
         image_id = self.create_id()
-        self.images_path = 'image_processing/images/'
+        self.images_path = '../image_processing/images/'
         self.image_path = self.images_path + image_id + '.' + file_type
-        with open(self.image_path, 'wb') as handler:
+        with open(self.image_path, 'w+') as handler:
             handler.write(image_data)
 
         return image_data, self.image_path, image_id

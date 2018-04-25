@@ -71,7 +71,7 @@ class TensorModel(object):
 
     def __init__(self):
 
-        TF_FILE_PATH = "tensor_classifier/tensorflow-for-poets-2/tf_files/"
+        TF_FILE_PATH = "../tensor_classifier/tensorflow-for-poets-2/tf_files/"
 
         self.model_file = TF_FILE_PATH + "retrained_graph.pb"
         self.label_file = TF_FILE_PATH +  "retrained_labels.txt"

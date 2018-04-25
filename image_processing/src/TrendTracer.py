@@ -61,7 +61,7 @@ class TrendTracer(object):
         if not self.trace_will_bee_too_long():
 
 
-            trace = " where it starts at " + str(self.datapoints[0]) + ", "
+            trace = "It starts at " + str(self.datapoints[0]) + ", "
             for index, point in enumerate(self.datapoints[1:]):
                 if index == len(self.datapoints) - 1:
                     break
