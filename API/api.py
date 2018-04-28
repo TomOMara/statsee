@@ -5,6 +5,7 @@ from flask_restful import Api
 from DemoResourceAPI import DemoResourceAPI
 from GraphParserAPI import GraphParserAPI
 from GraphVerifierAPI import GraphVerifierAPI
+from ExperimentResourceAPI import ExperimentResourceAPI
 
 app = Flask(__name__)
 api = Api(app)
@@ -21,6 +22,7 @@ def after_request(response):
 # Routes
 api.add_resource(GraphParserAPI, '/')
 api.add_resource(DemoResourceAPI, '/demo_webpage')
+api.add_resource(ExperimentResourceAPI, '/experiment')
 api.add_resource(GraphVerifierAPI, '/verify_graph')
 
 if __name__ == '__main__':
