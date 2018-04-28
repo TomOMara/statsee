@@ -22,6 +22,11 @@ class GraphParserAPI(Resource):
     def post(self):
         image_url = str(request.form['url'])
 
+        # stop if the image is an svg
+        if self.image_is_svg(image_url):
+            return self.respond_with(400, None, 'cannot parse svg images yet.')
+
+
         # download image from external site here
         _, image_path, image_id = self.ImageDownloader.download_image_from_url(image_url)
 
@@ -51,3 +56,10 @@ class GraphParserAPI(Resource):
         """
         return { 'status': status, 'data': data, 'message': message }
 
+
+    def image_is_svg(self, url):
+
+        if url.rsplit('.', 1)[-1] == 'svg':
+            return True
+
+        return False
