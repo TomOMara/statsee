@@ -3,7 +3,7 @@ import cv2
 from utilities import expand_data_array
 from math import floor
 import os.path
-
+import json
 
 class ImageJsonPair:
 
@@ -22,6 +22,8 @@ class ImageJsonPair:
         self.x_axis_labels = None
         self.is_continuous = True
         self.is_discrete = False # make discrete by default
+        self.x_axis_title = self.get_x_axis_title()
+        self.y_axis_title = self.get_y_axis_title()
 
     def get_image_name(self):
         return self.image_name
@@ -43,6 +45,23 @@ class ImageJsonPair:
 
     def set_json_name(self, json_name):
         self.json_name = json_name
+
+    def get_x_axis_title(self):
+        x_axis_title = None
+        with open(self.get_json_name()) as f:
+            json_data = json.load(f)
+            x_axis_title = str(json_data['encoding']['x']['field'])
+
+        return x_axis_title
+
+    def get_y_axis_title(self):
+        y_axis_title = None
+        with open(self.get_json_name()) as f:
+            json_data = json.load(f)
+            y_axis_title = str(json_data['encoding']['y']['field'])
+
+        return y_axis_title
+
 
     def get_x_axis_labels(self):
         # TODO
