@@ -46,14 +46,28 @@ def end_trace_with_a_full_stop(trace):
     return trace[:-2]
 
 class TrendTracer(object):
-    def __init__(self, datapoints, times_sign_changes):
-        self.datapoints = remove_nones_from_datapoints(datapoints)
-        self.times_sign_changes = times_sign_changes
+    def __init__(self, curve, image_json_pair):
+        self.datapoints = remove_nones_from_datapoints(curve.y_values)
+        self.times_sign_changes = curve.times_sign_changed()
+        self.curve = curve
+        self.image_json_pair = image_json_pair
 
     def trace_will_bee_too_long(self):
         if self.times_sign_changes > len(self.datapoints) / 2:
             return True
         return False
+    def corresponding_x_value(self, index):
+        """ This is a hack and should be refactored as its likely to cause issues
+        """
+        n_nones_at_start = 0
+        for k, v in self.curve.values.items()[:int(len(self.curve.values) / 2)]:
+            if v is None:
+                n_nones_at_start += 1
+
+        correct_index = n_nones_at_start + index + 1
+
+        return self.curve.x_values[correct_index]
+
 
     def build_trend_trace(self):
         trace = None
@@ -61,8 +75,10 @@ class TrendTracer(object):
         if not self.trace_will_bee_too_long():
 
 
-            trace = "It starts at " + str(self.datapoints[0]) + ", "
-            for index, point in enumerate(self.datapoints[1:]):
+            trace = "From " + str(self.datapoints[0]) + " " + str(self.image_json_pair.y_axis_title) +  ", it "
+            for index, point in enumerate(self.datapoints):
+                if index == 0:
+                    continue
                 if index == len(self.datapoints) - 1:
                     break
 
@@ -78,7 +94,7 @@ class TrendTracer(object):
                 if close_to_the_end(self.datapoints, index):
                     trace += " where it finally "
 
-                trace += increases_how_much(curr, next_) + " to " + str(next_) + ", "
+                trace += increases_how_much(curr, next_) + " to " + str(next_) + " " + str(self.image_json_pair.y_axis_title) + " at " + str(self.corresponding_x_value(index)) + " " + str(self.image_json_pair.x_axis_title) + ", "
                 index += 1
 
             trace = end_trace_with_a_full_stop(trace)

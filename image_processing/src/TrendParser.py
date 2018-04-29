@@ -8,6 +8,7 @@ class TrendParser(object):
         self.datasets = datasets
         self.trends = {}
         self.flat_line_error_rate = float(image_json_pair.get_y_axis_val_max()) * 0.02
+        self.image_json_pair = image_json_pair
 
     def parse_trends(self):
         for curve in self.all_curves():
@@ -25,15 +26,11 @@ class TrendParser(object):
         return curves
 
     def overall_shape_of(self, curve):
-
-        # shape = "The line is shaped like a " + self.trend_shape(curve) + " and is " + self.trend_adjective(curve) +\
-        #          self.trend_direction(curve)
         shape = curve.shape()
-                # + " and is " + curve.adjective() + curve.direction()
         return shape
 
     def trace_of(self, curve):
-        return TrendTracer(curve.y_values, curve.times_sign_changed()).build_trend_trace()
+        return TrendTracer(curve, self.image_json_pair).build_trend_trace()
 
 
 

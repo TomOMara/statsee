@@ -1,0 +1,2512 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Code Climate Report for code</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-core.min.js" data-manual></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/components/prism-python.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/themes/prism.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/plugins/line-numbers/prism-line-numbers.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/plugins/line-highlight/prism-line-highlight.min.css" />
+    <script>
+      /**
+       * Report JS
+       */
+
+      (function(){
+        Prism.hooks.add('complete', function(env) {
+          var pre = env.element.parentNode;
+          var lines = pre && pre.dataset.line;
+
+          if (!pre || !lines || !/pre/i.test(pre.nodeName)) {
+            console.log('nope');
+            return;
+          }
+
+          var container = pre.parentElement;
+
+          if (!container || !container.classList.contains('code')) {
+            return;
+          }
+
+          console.log('collapsing', container);
+          container.style.height = 'auto';
+        });
+      })();
+
+      jQuery(function(){
+        function isVisible(element) {
+          return !!(
+            element.offsetWidth ||
+            element.offsetHeight ||
+            element.getClientRects().length
+          );
+        };
+
+        var pendingElements = [];
+        // Convert node list to arrays
+        pendingElements.push.apply(
+          pendingElements,
+          document.querySelectorAll('#smells .code')
+        );
+
+        var waypoints = [];
+
+        function updateInView() {
+          if (!pendingElements.length) {
+            return;
+          }
+
+          var visibleElements = pendingElements.filter(isVisible);
+          waypoints = visibleElements.map(function(element){
+            var $e = $(element),
+            elementTop = $e.offset().top;
+            return [
+              elementTop,
+              elementTop + $e.outerHeight(),
+              element
+            ];
+          });
+        };
+
+        function inView() {
+          var yTop = window.scrollY,
+          yBottom = window.scrollY + window.innerHeight;
+
+          return waypoints.filter(function(entry){
+            return (entry[0] <= yTop && entry[1] >= yTop) ||
+              (entry[0] > yTop && entry[1] < yBottom) ||
+              (entry[0] <= yBottom && entry[1] >= yBottom);
+          });
+        }
+
+        var inViewHandler = function(){
+          var entries = inView();
+          if (entries.length) {
+            entries.forEach(function(entry){
+              var containerElement = entry[2];
+
+              if (pendingElements.indexOf(containerElement) === -1) {
+                return;
+              }
+
+              element = containerElement.querySelector('pre code');
+
+              element.parentElement.style.visibility = 'visible';
+              Prism.highlightElement(element);
+
+              pendingElements.splice(
+                pendingElements.indexOf(containerElement),
+                1
+              );
+            });
+            updateInView();
+          }
+        };
+
+        function enableInView() {
+          window.addEventListener('scroll', inViewHandler);
+          window.addEventListener('resize', inViewHandler);
+          inViewHandler();
+        }
+
+        function disableInView() {
+          window.removeEventListener('scroll', inViewHandler);
+          window.removeEventListener('resize', inViewHandler);
+        }
+
+        updateInView();
+
+        function applyFilters() {
+          disableInView();
+          var category = $('#category-filter').val();
+          var engine = $('#engine-filter').val();
+          var list = document.getElementById('smells');
+          list.className = '';
+
+          var selector = '#smells li';
+
+          var suffix = '';
+          if (category !== '') {
+            list.classList.add('filter-category-' + category);
+          }
+          else {
+            list.classList.add('filter-category-all');
+          }
+          if (engine !== '') {
+            list.classList.add('filter-engine-' + engine);
+          }
+          else {
+            list.classList.add('filter-engine-all');
+          }
+
+          if (list.offsetHeight) {
+            $('#filtered-out-message').hide();
+
+            updateInView();
+            enableInView();
+          }
+          else {
+            $('#filtered-out-message').show();
+          }
+        }
+
+        $('#category-filter, #engine-filter').on('change', applyFilters);
+        applyFilters();
+
+        $('summary').on('click', function() {
+          setTimeout(function(){
+            updateInView();
+            inViewHandler();
+          },
+          1);
+        });
+      });
+    </script>
+    <style>
+      .filter-category-complexity > li,
+      .filter-category-duplication > li,
+      .filter-engine-duplication > li,
+      .filter-engine-structure > li,
+      .filter-none > li {
+        display: none;
+      }
+
+      .filter-category-all.filter-engine-duplication > li[data-engine="duplication"],
+      .filter-category-all.filter-engine-structure > li[data-engine="structure"],
+      .filter-category-complexity.filter-engine-all > li[data-categories~="complexity"],
+      .filter-category-duplication.filter-engine-all > li[data-categories~="duplication"],
+      .filter-category-all.filter-engine-all > li[data-categories~="all"][data-engine="all"],
+      .filter-category-all.filter-engine-duplication > li[data-categories~="all"][data-engine="duplication"],
+      .filter-category-all.filter-engine-structure > li[data-categories~="all"][data-engine="structure"],
+      .filter-category-complexity.filter-engine-all > li[data-categories~="complexity"][data-engine="all"],
+      .filter-category-complexity.filter-engine-duplication > li[data-categories~="complexity"][data-engine="duplication"],
+      .filter-category-complexity.filter-engine-structure > li[data-categories~="complexity"][data-engine="structure"],
+      .filter-category-duplication.filter-engine-all > li[data-categories~="duplication"][data-engine="all"],
+      .filter-category-duplication.filter-engine-duplication > li[data-categories~="duplication"][data-engine="duplication"],
+      .filter-category-duplication.filter-engine-structure > li[data-categories~="duplication"][data-engine="structure"],
+      .filter-category-all.filter-engine-all > li {
+        display: block;
+      }
+    </style>
+    <style>
+      /**
+      * prism.js Code Climate theme based on Coy theme
+      */
+
+      code[class*="language-"],
+      pre[class*="language-"] {
+        color: black;
+        font-family: Consolas, 'Bitstream Vera Sans Mono', Monaco, Courier, monospace;
+        direction: ltr;
+        text-align: left;
+        white-space: pre;
+        word-spacing: normal;
+        word-break: normal;
+        tab-size: 4;
+        hyphens: none;
+        font-size: 12px;
+      }
+
+      pre[class*="language-"] {
+        position:relative;
+        background-color: #fdfdfd;
+        background-image: linear-gradient(rgba(69, 142, 209, 0.0) 50%, rgba(69, 142, 209, 0.04) 50%);
+        background-size: 3em 3em;
+        background-origin: content-box;
+        overflow: hidden;
+        /*border: 1px solid #dde8ef;*/
+        margin-top: 1em;
+      }
+
+      pre > code[class*="language-"] {
+        display: block;
+        z-index: 100;
+      }
+
+      /* Inline code */
+      :not(pre) > code[class*="language-"] {
+        position:relative;
+        padding: .2em;
+        -webkit-border-radius: 0.3em;
+        -moz-border-radius: 0.3em;
+        -ms-border-radius: 0.3em;
+        -o-border-radius: 0.3em;
+        border-radius: 0.3em;
+      }
+
+      .token.comment,
+      .token.block-comment,
+      .token.prolog,
+      .token.doctype,
+      .token.cdata {
+        color: #999988;
+      }
+
+      .token.punctuation {
+        font-weight: bold;
+      }
+
+      .token.constant {
+        color: #555555
+      }
+
+      .token.symbol {
+        color: #990073;
+      }
+
+      .token.number {
+        color: #009999;
+      }
+
+      .token.property,
+      .token.tag,
+      .token.boolean,
+      .token.function-name,
+      .token.deleted {
+        color: #c92c2c;
+      }
+
+      .token.string {
+        color: #D14
+      }
+      .token.selector,
+      .token.attr-name,
+      .token.builtin,
+      .token.inserted {
+        color: #2f9c0a;
+      }
+
+      .token.variable {
+        color: #008080;
+      }
+
+      .token.operator {
+        font-weight: bold;
+      }
+
+      .token.entity,
+      .token.url {
+        color: #a67f59;
+      }
+
+      .token.keyword {
+        font-weight: bold;
+      }
+
+      .token.class-name {
+        color: #445588;
+        font-weight: bold;
+      }
+
+      .token.atrule,
+      .token.attr-value {
+        color: #1990b8;
+      }
+
+      .token.regex {
+        color: #808000;
+      }
+
+      .token.important {
+        color: #e90;
+      }
+
+      .style .token.string {
+        color: #a67f59;
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .token.important {
+        font-weight: normal;
+      }
+
+      .token.entity {
+        cursor: help;
+      }
+
+      .namespace {
+        opacity: .7;
+      }
+
+      pre.line-numbers {
+        position: relative;
+        padding-left: 40px;
+        counter-reset: linenumber;
+      }
+
+      pre.line-numbers > code {
+        position: relative;
+        padding-left: 4px;
+      }
+
+      .line-numbers .line-numbers-rows {
+        position: absolute;
+        pointer-events: none;
+        top: 0;
+        font-size: 100%;
+        left: -3.8em;
+        width: 3.8em; /* works for line-numbers below 1000 lines */
+        letter-spacing: -1px;
+        padding-top: 1px;
+        user-select: none;
+        background-color: #f1f1f1;
+        color: #757575;
+      }
+
+      .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+      }
+
+      .line-numbers-rows > span:before {
+        content: counter(linenumber);
+        color: #999;
+        display: block;
+        padding-right: 0.8em;
+        text-align: right;
+      }
+    </style>
+    <style>
+      /**
+       * Report styles
+       */
+
+      html, body {
+        font-size: 15px;
+        line-height: 1.333;
+        background: #f6f6f5;
+        color: #323543;
+        font-family: "BentonSans", helvetica, arial, sans-serif;
+        font-style: normal;
+        font-weight: normal;
+        min-width: 960px;
+        margin: 0;
+        padding: 0;
+      }
+      a {
+        color:#007dce;
+        text-decoration: none;
+      }
+      a:hover {
+        color:#005e9b;
+        text-decoration: underline;
+      }
+      .container {
+        width: 960px;
+        margin: 0 auto;
+      }
+      #top {
+        color: #fff;
+        background: #323543;
+          padding: 5px 0;
+      }
+      #logo {
+        background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22144%22%20height%3D%22144%22%20viewBox%3D%220%200%20144%20144%22%3E%3Cg%20fill%3D%22%23FFF%22%3E%3Cpath%20d%3D%22M93.548%2037.327L69.856%2061.02l14.09%2014.09%209.602-9.6%2027.243%2027.243%2014.09-14.092M65.483%2065.393l-14.03-14.03-35.78%2035.783-5.554%205.552%2014.09%2014.09%205.553-5.552%2018.14-18.138%203.55-3.552%2014.03%2014.028%2013.214%2013.216%2014.09-14.093-13.215-13.213%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E') center center no-repeat;
+        background-size: 35px 40px;
+        height: 40px;
+        width: 40px;
+        display: inline-block;
+        overflow: hidden;
+        text-indent: -99999px;
+        color: #fff;
+        vertical-align: middle;
+      }
+      #top h1 {
+        display: inline-block;
+        font-size: 16px;
+        font-weight: normal;
+        margin: 0;
+        vertical-align: middle;
+      }
+      #top h1::before {
+        content: '/ ';
+      }
+      nav ul, #smells {
+        margin: 0;
+        padding: 0;
+      }
+      nav li {
+        list-style: none;
+        padding: 10px 20px;
+        color: #5e637d;
+        position: relative;
+        display: inline-block;
+      }
+      nav li::after {
+        content: '';
+        position: absolute;
+        border-bottom: 8px solid #fff;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        bottom: 0px;
+        left: 50%;
+        margin-left: -8px;
+      }
+      #main-container {
+        background: #fff;
+        padding: 20px;
+        overflow: hidden;
+        position: relative;
+      }
+      .issue-filters {
+        float: right;
+        width: 200px;
+      }
+      .issue-filters label,
+      .issue-filters select {
+        display: block;
+        width: 100%;
+      }
+      .issue-filters label {
+        margin-top: 10px;
+      }
+      #smells {
+        max-width: 680px;
+      }
+      #smells > li {
+        list-style: none;
+        border-bottom: 1px solid #f6f6f5;
+        padding-top: 10px;
+        padding-bottom: 20px;
+      }
+      #smells > li:last-of-type {
+        border-bottom: 0px none;
+        padding-bottom: 0;
+      }
+      #smells > li > h2 {
+        font-weight: bold;
+        margin-top: 0;
+        font-size: inherit;
+      }
+
+      #smells .code {
+        position: relative;
+        overflow: hidden;
+        border-radius: 3px;
+        border: 1px solid #dde8ef;
+        height: 6em;
+        margin: 10px 0;
+      }
+      #smells .code > pre {
+        visibility: hidden;
+      }
+      #smells .code > pre,
+      #smells .code > pre .line-highlight {
+        margin-bottom: 0;
+        margin-top: 0;
+        padding-bottom: 0;
+        padding-top: 0;
+      }
+
+      .found-in {
+        font-size: 12px;
+        line-height: 20px;
+        color: #9999a1;
+        margin-top: 10px;
+        margin-bottom: 15px;
+      }
+      .found-in a {
+        color: #35b0ff;
+      }
+      ::-webkit-details-marker {display: none;}
+      details summary {
+        display: block;
+      }
+      details summary::before {
+        content: "► ";
+
+      }
+      details[open] summary::before {
+        content: "▼ ";
+      }
+
+      #filtered-out-message {
+        display: none;
+        text-align: center;
+        position: absolute;
+        left: 0;
+        width: 720px;
+        text-align: center;
+        top: 50%;
+        margin-top: -1em;
+        line-height: 2em;
+      }
+
+      #no-issues-message {
+        text-align: center;
+      }
+      #no-issues-message::before {
+        content: "🎉";
+        font-size: 3em;
+          display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <header id="top">
+      <div class="container">
+        <a id="logo" href="https://codeclimate.com/">Code Climate</a>
+        <h1>code</h1>
+      </div>
+    </header>
+    <div class="container">
+      <nav>
+        <ul>
+          <li>
+            Issues
+          </li>
+        </ul>
+      </nav>
+      <div id="main-container">
+
+          <div class="issue-filters">
+            <label for="category-filter">Category</label>
+            <select id="category-filter">
+              <option value="">All Categories</option>
+              <option value="complexity">Complexity</option>
+              <option value="duplication">Duplication</option>
+            </select>
+            <label for="engine-filter">Engine</label>
+            <select id="engine-filter">
+              <option value="">All Engines</option>
+              <option value="duplication">duplication</option>
+              <option value="structure">structure</option>
+            </select>
+          </div>
+          <ul id="smells">
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `shape` has a Cognitive Complexity of 6 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="46-66"
+                     data-start="44"
+                     data-line-offset="43"><code>            return &quot;horizontal&quot;
+
+    def shape(self):
+        sentence_start = &quot;The line is shaped like a &quot;
+
+        if self.is_a_flat_line():
+            return &quot;The line is flat.&quot;
+
+        times_sign_changed = self.times_sign_changed()
+
+        # if we have between 0 and 1 call it a curve
+        if times_sign_changed == 0:
+
+            if is_positive(self.deltas[1]):
+                return sentence_start + &quot;rising ramp.&quot;
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in Curve.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Avoid too many `return` statements within this function.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="66"
+                     data-start="64"
+                     data-line-offset="63"><code>            return sentence_start + &quot;wave.&quot;
+
+        return &quot;&quot;
+
+    def is_a_flat_line(self):
+</code></pre>
+              </div>
+              <div class="found-in">
+                Found in Curve.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `get_rgb_range_of_edges_in_cuts` has a Cognitive Complexity of 12 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="119-165"
+                     data-start="117"
+                     data-line-offset="116"><code>
+
+def get_rgb_range_of_edges_in_cuts(cuts):
+
+    rgb_ranges = []
+    array_of_edge_coord_ranges = get_array_of_edge_coord_ranges(cuts)
+    most_coord_ranges_found, index_of_cut_with_most_edges = get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges)
+
+    if not most_coord_ranges_found:
+        return None
+
+    for edge_height in most_coord_ranges_found:
+        rgb_bounds_for_current_edge = get_lower_and_upper_bound_colour_range_for_edge(cuts[index_of_cut_with_most_edges],
+                                                                                      edge_height)
+        rgb_ranges.append(rgb_bounds_for_current_edge)
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `get_rgb_range_of_edges_in_cuts` has 34 lines of code (exceeds 25 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="119-165"
+                     data-start="117"
+                     data-line-offset="116"><code>
+
+def get_rgb_range_of_edges_in_cuts(cuts):
+
+    rgb_ranges = []
+    array_of_edge_coord_ranges = get_array_of_edge_coord_ranges(cuts)
+    most_coord_ranges_found, index_of_cut_with_most_edges = get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges)
+
+    if not most_coord_ranges_found:
+        return None
+
+    for edge_height in most_coord_ranges_found:
+        rgb_bounds_for_current_edge = get_lower_and_upper_bound_colour_range_for_edge(cuts[index_of_cut_with_most_edges],
+                                                                                      edge_height)
+        rgb_ranges.append(rgb_bounds_for_current_edge)
+</code></pre>
+              </div>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `__init__` has 6 arguments (exceeds 4 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="13"
+                     data-start="11"
+                     data-line-offset="10"><code>
+class MultilinePipeline:
+    def __init__(self, image_json_pair, parse_resolution, should_run_tests=False, should_illustrate_steps=False, should_save=False):
+        self.should_run_tests = should_run_tests
+        self.should_illustrate_steps = should_illustrate_steps
+</code></pre>
+              </div>
+              <div class="found-in">
+                Found in multiline_pipeline.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `run` has a Cognitive Complexity of 6 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="21-42"
+                     data-start="19"
+                     data-line-offset="18"><code>        self.should_save = should_save
+
+    def run(self):
+
+        if not self.image_json_pair:
+            # raise ValueError(&quot;No input files&quot;)
+            return -1, &quot;No input files&quot;
+
+        if self.should_run_tests:
+            doctest.testmod()
+
+        try:
+            self.datasets = self.get_all_datasets_for_image_in_pair()
+            self.print_output()
+            if self.should_save:
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in multiline_pipeline.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `split_image_into_binary_curves` has a Cognitive Complexity of 8 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="93-136"
+                     data-start="91"
+                     data-line-offset="90"><code>        return True if nones_in_curve &gt; length_of_curve/2 else False
+
+    def split_image_into_binary_curves(self):
+        &quot;&quot;&quot;
+
+        &quot;&quot;&quot;
+        masks = []
+        image_with_no_grid_lines = self.remove_image_grid_lines()
+
+        # Thicken the lines so to help with floodfilling.
+        transformed_colour_image = thicken_image_lines(image_with_no_grid_lines)
+        self.image_json_pair.set_image(transformed_colour_image)
+
+        coloured_ranges = get_colour_ranges_from_image(image_json_pair=self.image_json_pair)
+
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in multiline_pipeline.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `split_image_into_binary_curves` has 28 lines of code (exceeds 25 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="93-136"
+                     data-start="91"
+                     data-line-offset="90"><code>        return True if nones_in_curve &gt; length_of_curve/2 else False
+
+    def split_image_into_binary_curves(self):
+        &quot;&quot;&quot;
+
+        &quot;&quot;&quot;
+        masks = []
+        image_with_no_grid_lines = self.remove_image_grid_lines()
+
+        # Thicken the lines so to help with floodfilling.
+        transformed_colour_image = thicken_image_lines(image_with_no_grid_lines)
+        self.image_json_pair.set_image(transformed_colour_image)
+
+        coloured_ranges = get_colour_ranges_from_image(image_json_pair=self.image_json_pair)
+
+</code></pre>
+              </div>
+              <div class="found-in">
+                Found in multiline_pipeline.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Avoid too many `return` statements within this function.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="42"
+                     data-start="40"
+                     data-line-offset="39"><code>        except Exception as e:
+            print(&quot;Error: &quot; + e.message + &quot; couldn&#39;t complete &quot; + self.image_json_pair.get_image_name())
+            return -1, e.message
+
+    def save(self):
+</code></pre>
+              </div>
+              <div class="found-in">
+                Found in multiline_pipeline.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `build_trend_trace` has a Cognitive Complexity of 17 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="58-93"
+                     data-start="56"
+                     data-line-offset="55"><code>        return False
+
+    def build_trend_trace(self):
+        trace = None
+
+        if not self.trace_will_bee_too_long():
+
+
+            trace = &quot;It starts at &quot; + str(self.datapoints[0]) + &quot;, &quot;
+            for index, point in enumerate(self.datapoints[1:]):
+                if index == len(self.datapoints) - 1:
+                    break
+
+                curr = self.datapoints[index]
+                next_ = self.datapoints[index + 1]
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in TrendTracer.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>File `utilities.py` has 306 lines of code (exceeds 250 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="1-482"
+                     data-start="1"
+                     data-line-offset="0"><code>import cv2
+import json
+from graph_cutter import get_averaged_x_label_anchors
+from dash_connector import connect_dashes
+import numpy as np
+from edge_detection import *
+from preprocessing import *
+from skimage import measure
+import numpy as np
+from TrendParser import TrendParser
+
+def expand_data_array(data_array, factor):
+    &quot;&quot;&quot;
+</code></pre>
+              </div>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `expand_data_array` has a Cognitive Complexity of 6 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="12-80"
+                     data-start="10"
+                     data-line-offset="9"><code>from TrendParser import TrendParser
+
+def expand_data_array(data_array, factor):
+    &quot;&quot;&quot;
+    This takes a array of some length N and produces another larger array of length M where
+    M &gt; N and the delta between each element of the array (must cast to integers/floats)
+    is the same (excluding rounding).
+    Will not work on dates unless they are converted into timestamps first.
+
+
+    &gt;&gt;&gt; expand_data_array([1,2,3,4], 2)
+    [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+
+    &gt;&gt;&gt; expand_data_array([1,2,3,4], 3)
+    [1.0, 1.33, 1.67, 2.0, 2.33, 2.67, 3.0, 3.33, 3.67, 4.0]
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `format_curves_to_dictionary` has a Cognitive Complexity of 8 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="83-152"
+                     data-start="81"
+                     data-line-offset="80"><code>
+
+def format_curves_to_dictionary(datasets):
+    &quot;&quot;&quot;
+
+    &gt;&gt;&gt; dataset = [[(&#39;1&#39;, 3), (&#39;2&#39;, 3), (&#39;3&#39;, 3)], [(&#39;x&#39;, 4), (&#39;y&#39;, 4), (&#39;z&#39;, 4)]]
+    &gt;&gt;&gt; format_curves_to_dictionary(dataset)
+    {&#39;A&#39;: {&#39;1&#39;: 3, &#39;3&#39;: 3, &#39;2&#39;: 3}, &#39;B&#39;: {&#39;y&#39;: 4, &#39;x&#39;: 4, &#39;z&#39;: 4}}
+
+    &gt;&gt;&gt; dataset = [[(&#39;1&#39;, 3.791), (&#39;2&#39;, 3.791), (&#39;3&#39;, 3.791)]]
+    &gt;&gt;&gt; format_curves_to_dictionary(dataset)
+    {&#39;A&#39;: {&#39;1&#39;: 3.791, &#39;3&#39;: 3.791, &#39;2&#39;: 3.791}}
+
+    &gt;&gt;&gt; dataset = (&#39;1&#39;, 3.791)
+    &gt;&gt;&gt; format_curves_to_dictionary(dataset)
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `get_cc_matrix_from_binary_image` has a Cognitive Complexity of 9 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="231-274"
+                     data-start="229"
+                     data-line-offset="228"><code>    return label_positions
+
+def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
+    &quot;&quot;&quot;
+    Given a binary image containing many components, generate a cc_matrix
+    containing only those components with min_connected_pixels, a.k.a remove
+    small stuff
+    :param binary_image:
+    :param min_connected_pixels:
+    :return:
+    &quot;&quot;&quot;
+
+    connected_components = measure.label(binary_image, background=0, neighbors=8)
+    cc_matrix = np.zeros(binary_image.shape, dtype=&quot;uint8&quot;)
+
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `connect_and_split_probable_dashes` has a Cognitive Complexity of 8 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="277-312"
+                     data-start="275"
+                     data-line-offset="274"><code>
+
+def connect_and_split_probable_dashes(binary_mask, probable_dash_max=150, probable_dash_min=5):
+
+    connected_components = measure.label(binary_mask, background=0, neighbors=8)
+    probable_dashes = []
+    cc_matrices = []
+    for component in np.unique(connected_components):
+        # ignore black component
+        if component == 0:
+            continue
+
+        # otherwise, construct the component mask and count the
+        # number of pixels
+        component_mask = np.zeros(binary_mask.shape, dtype=&quot;uint8&quot;)
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `estimate_many_missing_values` has a Cognitive Complexity of 6 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="407-437"
+                     data-start="405"
+                     data-line-offset="404"><code>    return arr
+
+def estimate_many_missing_values(idx, y_coords):
+    # first establish how many missing values we have starting from idx
+    missing_vals = 0
+    counter = idx
+    while y_coords[counter] is None:
+
+        missing_vals += 1
+        counter += 1
+        if counter == len(y_coords):
+            return y_coords
+
+    # get previous and next known values
+    prev_known_val = y_coords[idx - 1]
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="complexity"
+              data-engine="structure">
+              <h2>Function `get_y_coordinates_for_cuts` has a Cognitive Complexity of 7 (exceeds 5 allowed). Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="439-463"
+                     data-start="437"
+                     data-line-offset="436"><code>    return y_coords
+
+def get_y_coordinates_for_cuts(cuts, y_val_max, y_pixel_height):
+    pixel_coords = []
+    units_per_pixel = float(y_val_max) / float(y_pixel_height)
+    y_coords = []
+
+    # get pixel number where we first see our connected component
+    # in our cut
+    for idx in range(len(cuts)):
+        pixel_coord = verticle_position_of_edge_if_edge_present_in_cut(cuts[idx])
+        if pixel_coord:
+            pixel_coords.append(pixel_coord)
+        else:
+            pixel_coords.append(None)
+</code></pre>
+              </div>
+                <details>
+                  <summary>Details</summary>
+                  <h1>Cognitive Complexity</h1>
+
+<p>Cognitive Complexity is a measure of how difficult a unit of code is to intuitively understand. Unlike Cyclomatic Complexity, which determines how difficult your code will be to test, Cognitive Complexity tells you how difficult your code will be to read and comprehend.</p>
+
+<h3>A method&#39;s cognitive complexity is based on a few simple rules:</h3>
+
+<ul>
+<li>Code is not considered more complex when it uses shorthand that the language provides for collapsing multiple statements into one</li>
+<li>Code is considered more complex for each &quot;break in the linear flow of the code&quot;</li>
+<li>Code is considered more complex when &quot;flow breaking structures are nested&quot;</li>
+</ul>
+
+<h3>Further reading</h3>
+
+<ul>
+<li><a href="https://docs.codeclimate.com/v1.0/docs/cognitive-complexity" target="_blank">Cognitive Complexity docs</a></li>
+<li><a href="https://www.sonarsource.com/docs/CognitiveComplexity.pdf" target="_blank">Cognitive Complexity: A new way of measuring understandability</a></li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/structure">structure</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Identical blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="5-10"
+                     data-start="3"
+                     data-line-offset="2"><code>
+
+def show_image(image):
+    if type(image) is str:
+        image = cv2.imread(image)
+
+    cv2.imshow(&quot;output&quot;, image)
+    cv2.waitKey(0)
+
+
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>utilities.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="162-167"
+                           data-start="160"
+                           data-line-offset="159"><code>
+
+def show_image(image):
+    if type(image) is str:
+        image = cv2.imread(image)
+
+    cv2.imshow("output", image)
+    cv2.waitKey(0)
+
+
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 50</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Identical blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="162-167"
+                     data-start="160"
+                     data-line-offset="159"><code>
+
+def show_image(image):
+    if type(image) is str:
+        image = cv2.imread(image)
+
+    cv2.imshow(&quot;output&quot;, image)
+    cv2.waitKey(0)
+
+
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="5-10"
+                           data-start="3"
+                           data-line-offset="2"><code>
+
+def show_image(image):
+    if type(image) is str:
+        image = cv2.imread(image)
+
+    cv2.imshow("output", image)
+    cv2.waitKey(0)
+
+
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 50</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="64-81"
+                     data-start="62"
+                     data-line-offset="61"><code>    return [x-int(adjustment_factor) for x in unadjusted_label_positions if x != 0]
+
+def get_unadjusted_x_label_anchors(x_width, x_labels):
+    &quot;&quot;&quot;
+    Get the x distance of each label on the x axis
+    &gt;&gt;&gt; get_unadjusted_x_label_anchors(x_width=80, x_labels=[&quot;0&quot;,&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;])
+    [0, 20, 40, 60, 80]
+
+    :param x_width:
+    :param x_labels:
+    :return:
+    &quot;&quot;&quot;
+    from math import ceil, floor
+    label_positions = []
+    n_slices = len(x_labels) - 1
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>utilities.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="220-229"
+                           data-start="218"
+                           data-line-offset="217"><code>    return json
+
+def get_x_label_positions(x_labels, x_width):
+    """ gets coordinates of x axis labels in pixels """
+    from math import ceil, floor
+    label_positions = []
+    n_slices = len(x_labels) - 1
+
+    for idx in xrange(0, n_slices + 1):
+        label_positions.append(int(ceil(x_width * (float(idx) / n_slices))))  # ew
+
+    return label_positions
+
+def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 87</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in graph_cutter.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="220-229"
+                     data-start="218"
+                     data-line-offset="217"><code>    return json
+
+def get_x_label_positions(x_labels, x_width):
+    &quot;&quot;&quot; gets coordinates of x axis labels in pixels &quot;&quot;&quot;
+    from math import ceil, floor
+    label_positions = []
+    n_slices = len(x_labels) - 1
+
+    for idx in xrange(0, n_slices + 1):
+        label_positions.append(int(ceil(x_width * (float(idx) / n_slices))))  # ew
+
+    return label_positions
+
+def get_cc_matrix_from_binary_image(binary_image, min_connected_pixels=100):
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>graph_cutter.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="64-81"
+                           data-start="62"
+                           data-line-offset="61"><code>    return [x-int(adjustment_factor) for x in unadjusted_label_positions if x != 0]
+
+def get_unadjusted_x_label_anchors(x_width, x_labels):
+    """
+    Get the x distance of each label on the x axis
+    >>> get_unadjusted_x_label_anchors(x_width=80, x_labels=["0","1","2","3","4"])
+    [0, 20, 40, 60, 80]
+
+    :param x_width:
+    :param x_labels:
+    :return:
+    """
+    from math import ceil, floor
+    label_positions = []
+    n_slices = len(x_labels) - 1
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 87</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 3 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="238"
+                     data-start="236"
+                     data-line-offset="235"><code>
+    # minimum and maximum R values for this edge
+    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="239"
+                           data-start="237"
+                           data-line-offset="236"><code>    # minimum and maximum R values for this edge
+    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
+
+</code></pre>
+                    </div>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="240"
+                           data-start="238"
+                           data-line-offset="237"><code>    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
+
+    u_b = max(edge_channel_b)
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 55</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 3 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="239"
+                     data-start="237"
+                     data-line-offset="236"><code>    # minimum and maximum R values for this edge
+    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
+
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="238"
+                           data-start="236"
+                           data-line-offset="235"><code>
+    # minimum and maximum R values for this edge
+    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
+</code></pre>
+                    </div>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="240"
+                           data-start="238"
+                           data-line-offset="237"><code>    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
+
+    u_b = max(edge_channel_b)
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 55</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 3 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="240"
+                     data-start="238"
+                     data-line-offset="237"><code>    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
+
+    u_b = max(edge_channel_b)
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="238"
+                           data-start="236"
+                           data-line-offset="235"><code>
+    # minimum and maximum R values for this edge
+    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
+</code></pre>
+                    </div>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="239"
+                           data-start="237"
+                           data-line-offset="236"><code>    # minimum and maximum R values for this edge
+    edge_channel_b = [channel_b[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_b[centered_edge_height_tuple[0]]]
+    edge_channel_g = [channel_g[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_g[centered_edge_height_tuple[0]]]
+    edge_channel_r = [channel_r[i] for i in range(centered_edge_height_tuple[0], centered_edge_height_tuple[1])] or [channel_r[centered_edge_height_tuple[0]]]
+
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 55</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="81-99"
+                     data-start="79"
+                     data-line-offset="78"><code>
+
+def get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges):
+    &quot;&quot;&quot;
+    This section stores the cut with most edges in edge_coord_ranges_of_cut_with_most_edges
+    :param array_of_edge_coord_ranges: 
+    :return: edge_coord_range, index_of_cut_with_most_edges
+    &quot;&quot;&quot;
+    index_of_cut_with_most_edges = 0
+    edge_coord_ranges_of_cut_with_most_edges = None
+    most_edges_in_cut_found = 0
+
+    for edge_coord_range in array_of_edge_coord_ranges:
+        n_edges = len(edge_coord_range)
+
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="259-277"
+                           data-start="257"
+                           data-line-offset="256"><code>
+
+def get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges):
+    """
+    This section stores the cut with most edges in edge_coord_ranges_of_cut_with_most_edges
+    :param array_of_edge_coord_ranges:
+    :return: edge_coord_range, index_of_cut_with_most_edges
+    """
+    index_of_cut_with_most_edges = 0
+    edge_coord_ranges_of_cut_with_most_edges = None
+    most_edges_in_cut_found = 0
+
+    for edge_coord_range in array_of_edge_coord_ranges:
+        n_edges = len(edge_coord_range)
+
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 76</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="259-277"
+                     data-start="257"
+                     data-line-offset="256"><code>
+
+def get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges):
+    &quot;&quot;&quot;
+    This section stores the cut with most edges in edge_coord_ranges_of_cut_with_most_edges
+    :param array_of_edge_coord_ranges:
+    :return: edge_coord_range, index_of_cut_with_most_edges
+    &quot;&quot;&quot;
+    index_of_cut_with_most_edges = 0
+    edge_coord_ranges_of_cut_with_most_edges = None
+    most_edges_in_cut_found = 0
+
+    for edge_coord_range in array_of_edge_coord_ranges:
+        n_edges = len(edge_coord_range)
+
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="81-99"
+                           data-start="79"
+                           data-line-offset="78"><code>
+
+def get_edge_coord_range_and_index_of_cut_with_most_edges(array_of_edge_coord_ranges):
+    """
+    This section stores the cut with most edges in edge_coord_ranges_of_cut_with_most_edges
+    :param array_of_edge_coord_ranges: 
+    :return: edge_coord_range, index_of_cut_with_most_edges
+    """
+    index_of_cut_with_most_edges = 0
+    edge_coord_ranges_of_cut_with_most_edges = None
+    most_edges_in_cut_found = 0
+
+    for edge_coord_range in array_of_edge_coord_ranges:
+        n_edges = len(edge_coord_range)
+
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 76</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="36-46"
+                     data-start="34"
+                     data-line-offset="33"><code>
+
+def get_cuts_for_image(image, positions_to_cut):
+    # gets a number of vertical cuts at position to cut
+    cuts = []
+
+    # for each group
+    for pos in positions_to_cut:
+        # take a cut
+        cut = image[:, pos]
+        cuts.append(cut)
+
+    return cuts
+
+
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>utilities.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="466-472"
+                           data-start="464"
+                           data-line-offset="463"><code>
+
+def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
+    cuts = []
+    for pos in label_positions:
+        cut = cc_matrix[:, pos]
+        cuts.append(cut)
+
+    return cuts
+
+
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 44</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="466-472"
+                     data-start="464"
+                     data-line-offset="463"><code>
+
+def get_x_axis_cuts_from_ccm(label_positions, cc_matrix):
+    cuts = []
+    for pos in label_positions:
+        cut = cc_matrix[:, pos]
+        cuts.append(cut)
+
+    return cuts
+
+
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="36-46"
+                           data-start="34"
+                           data-line-offset="33"><code>
+
+def get_cuts_for_image(image, positions_to_cut):
+    # gets a number of vertical cuts at position to cut
+    cuts = []
+
+    # for each group
+    for pos in positions_to_cut:
+        # take a cut
+        cut = image[:, pos]
+        cuts.append(cut)
+
+    return cuts
+
+
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 44</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in utilities.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="19-21"
+                     data-start="17"
+                     data-line-offset="16"><code>        modded_channels.append(modded_channel)
+    modded_channels = np.asarray(modded_channels)
+    _or = cv2.merge((modded_channels[0],
+                     modded_channels[1],
+                     modded_channels[2]))
+    return _or
+
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>preprocessing.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="28-30"
+                           data-start="26"
+                           data-line-offset="25"><code>        dilated_channels.append(dilated_channel)
+    dilated_channels = np.asarray(dilated_channels)
+    dilated_image = cv2.merge((dilated_channels[0],
+                               dilated_channels[1],
+                               dilated_channels[2]))
+
+    # return dilated_image
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 33</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in edge_detection.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+            <li
+              data-categories="duplication"
+              data-engine="duplication">
+              <h2>Similar blocks of code found in 2 locations. Consider refactoring.</h2>
+              <div class="code">
+                <pre class="line-numbers language-python"
+                     data-line="28-30"
+                     data-start="26"
+                     data-line-offset="25"><code>        dilated_channels.append(dilated_channel)
+    dilated_channels = np.asarray(dilated_channels)
+    dilated_image = cv2.merge((dilated_channels[0],
+                               dilated_channels[1],
+                               dilated_channels[2]))
+
+    # return dilated_image
+</code></pre>
+              </div>
+
+                <details>
+                  <summary>Other instances</summary>
+                    <h4>edge_detection.py</h3>
+                    <div class="code">
+                      <pre class="line-numbers language-python"
+                           data-line="19-21"
+                           data-start="17"
+                           data-line-offset="16"><code>        modded_channels.append(modded_channel)
+    modded_channels = np.asarray(modded_channels)
+    _or = cv2.merge((modded_channels[0],
+                     modded_channels[1],
+                     modded_channels[2]))
+    return _or
+
+</code></pre>
+                    </div>
+                </details>
+                <details>
+                  <summary>Details</summary>
+                  <h2>Duplicated Code</h2>
+
+<p>Duplicated code can lead to software that is hard to understand and difficult to change. The Don&#39;t Repeat Yourself (DRY) principle states:</p>
+
+<blockquote>
+<p>Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.</p>
+</blockquote>
+
+<p>When you violate DRY, bugs and maintenance problems are sure to follow. Duplicated code has a tendency to both continue to replicate and also to diverge (leaving bugs as two similar implementations differ in subtle ways).</p>
+
+<h2>Tuning</h2>
+
+<p><strong>This issue has a mass of 33</strong>.</p>
+
+<p>We set useful threshold defaults for the languages we support but you may want to adjust these settings based on your project guidelines.</p>
+
+<p>The threshold configuration represents the minimum <a href="https://docs.codeclimate.com/docs/duplication#mass" target="_blank">mass</a> a code block must have to be analyzed for duplication. The lower the threshold, the more fine-grained the comparison.</p>
+
+<p>If the engine is too easily reporting duplication, try raising the threshold. If you suspect that the engine isn&#39;t catching enough duplication, try lowering the threshold. The best setting tends to differ from language to language.</p>
+
+<p>See <a href="https://docs.codeclimate.com/docs/duplication" target="_blank"><code>codeclimate-duplication</code>&#39;s documentation</a> for more information about tuning the mass threshold in your <code>.codeclimate.yml</code>.</p>
+
+<h2>Refactorings</h2>
+
+<ul>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-method" target="_blank">Extract Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/extract-class" target="_blank">Extract Class</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/form-template-method" target="_blank">Form Template Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/introduce-null-object" target="_blank">Introduce Null Object</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-method" target="_blank">Pull Up Method</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/pull-up-field" target="_blank">Pull Up Field</a></li>
+<li>  <a href="http://sourcemaking.com/refactoring/substitute-algorithm" target="_blank">Substitute Algorithm</a></li>
+</ul>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li>  <a href="http://c2.com/cgi/wiki?DontRepeatYourself" target="_blank">Don&#39;t Repeat Yourself</a> on the C2 Wiki</li>
+<li>  <a href="http://sourcemaking.com/refactoring/duplicated-code" target="_blank">Duplicated Code</a> on SourceMaking</li>
+<li>  <a href="http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672" target="_blank">Refactoring: Improving the Design of Existing Code</a> by Martin Fowler. <em>Duplicated Code</em>, p76</li>
+</ul>
+                </details>
+              <div class="found-in">
+                Found in preprocessing.py by
+                <a href="https://docs.codeclimate.com/docs/duplication">duplication</a>
+              </div>
+            </li>
+          </ul>
+          <div id="filtered-out-message">All issues have been filtered out</div>
+      </div>
+    </div>
+  </div>
+  </body>
+</html>
