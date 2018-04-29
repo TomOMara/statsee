@@ -119,3 +119,5 @@ image_processing/out/
 image_processing/images/
 image_processing/json/
 out/
+experiment.txt
+image_processing/.pytest_cache/v/cache/lastfailed
