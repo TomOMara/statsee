@@ -106,7 +106,9 @@ class TensorModel(object):
         for i in top_k:
             print(labels[i], results[i])
 
-        if results[0] > 0.99:
-            return True
-        else:
-            return False
+        # if results[0] > 0.99:
+        #     return True
+        # else:
+        #     return False
+
+        return results

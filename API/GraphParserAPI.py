@@ -43,6 +43,8 @@ class GraphParserAPI(Resource):
             else:
                 return self.respond_with(501, None, 'error generating description with iGraph')
 
+        if self.GraphVerifier.image_is_other_type_of_graph(image_url):
+            return self.respond_with(200, 'We do not support this type of graph yet but plan to in the future!', 'No errors')
 
         # wasn't line graph
         return self.respond_with(400, None, 'image was not a line graph')
