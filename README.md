@@ -14,4 +14,4 @@ README's:
 
 🚀[iGraph Mods](https://github.com/TomOMara/iGraph)
 
-🚀[chrome extension](https://github.com/TomOMara/chrome_extension)
+🚀[chrome extension](https://github.com/TomOMara/statsee_chrome_extension)
